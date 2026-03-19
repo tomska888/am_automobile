@@ -1,0 +1,446 @@
+/* ============================================================
+   AM AUTOMOBILE — LAYOUT SYSTEM
+   Container, Grid, Section, and Responsive Patterns
+   Author: ArchitectUX
+   ============================================================ */
+
+/* ── CONTAINER SYSTEM ────────────────────────────────────── */
+.container {
+    width: 100%;
+    max-width: var(--container-2xl);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+}
+
+.container-sm {
+    max-width: var(--container-sm);
+}
+
+.container-md {
+    max-width: var(--container-md);
+}
+
+.container-lg {
+    max-width: var(--container-lg);
+}
+
+.container-xl {
+    max-width: var(--container-xl);
+}
+
+.container-2xl {
+    max-width: var(--container-2xl);
+}
+
+@media (min-width: 576px) {
+    .container {
+        padding-inline: var(--space-6);
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        padding-inline: var(--space-8);
+    }
+}
+
+/* ── SECTION SYSTEM ──────────────────────────────────────── */
+.section {
+    padding-block: var(--space-16);
+}
+
+.section-sm {
+    padding-block: var(--space-12);
+}
+
+.section-lg {
+    padding-block: var(--space-24);
+}
+
+.section-bg-primary {
+    background-color: var(--bg-primary);
+}
+
+.section-bg-secondary {
+    background-color: var(--bg-secondary);
+}
+
+.section-bg-tertiary {
+    background-color: var(--bg-tertiary);
+}
+
+.section-bg-brand {
+    background-color: var(--primary-dark);
+    color: #fff;
+}
+
+.section-bg-dark {
+    background-color: #0d1117;
+    color: #E6EDF3;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+}
+
+.section-header .section-label {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semi);
+    letter-spacing: var(--letter-spacing-wider);
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--space-3);
+}
+
+.section-header .section-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--space-4);
+}
+
+.section-header .section-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-inline: auto;
+    line-height: var(--line-height-relaxed);
+}
+
+@media (min-width: 992px) {
+    .section-header .section-title {
+        font-size: var(--text-4xl);
+    }
+}
+
+/* ── HERO LAYOUT ─────────────────────────────────────────── */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-content {
+    position: relative;
+    z-index: var(--z-raised);
+    padding-block: var(--space-24);
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #0a2d6b 50%, #000d1a 100%);
+    z-index: var(--z-base);
+}
+
+.hero-bg-pattern {
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(0, 123, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 102, 204, 0.1) 0%, transparent 40%);
+    z-index: 1;
+}
+
+/* ── CSS GRID SYSTEM ─────────────────────────────────────── */
+.grid {
+    display: grid;
+    gap: var(--space-6);
+}
+
+/* Auto-fit responsive grids */
+.grid-auto-sm {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.grid-auto-md {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-auto-lg {
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+/* Fixed column grids */
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Sidebar layout */
+.grid-sidebar {
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-8);
+}
+
+.grid-sidebar-right {
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-8);
+}
+
+/* Content + aside */
+.grid-content {
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-8);
+}
+
+/* Responsive grid overrides */
+@media (max-width: 991px) {
+
+    .grid-2,
+    .grid-3,
+    .grid-4,
+    .grid-sidebar,
+    .grid-sidebar-right,
+    .grid-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+    .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── FLEXBOX UTILITIES ───────────────────────────────────── */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.gap-2 {
+    gap: var(--space-2);
+}
+
+.gap-3 {
+    gap: var(--space-3);
+}
+
+.gap-4 {
+    gap: var(--space-4);
+}
+
+.gap-6 {
+    gap: var(--space-6);
+}
+
+.gap-8 {
+    gap: var(--space-8);
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+/* ── PAGE WRAPPER ────────────────────────────────────────── */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.page-content {
+    flex: 1;
+    padding-top: var(--nav-height);
+}
+
+.page-content-no-offset {
+    flex: 1;
+}
+
+/* ── NAVIGATION LAYOUT ───────────────────────────────────── */
+.navbar-am {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    z-index: var(--z-fixed);
+    transition: background-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.navbar-am.is-transparent {
+    background-color: var(--nav-bg-transparent);
+    box-shadow: none;
+}
+
+.navbar-am.is-solid,
+.navbar-am.is-scrolled {
+    background-color: var(--nav-bg-solid);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ── ADMIN LAYOUT ────────────────────────────────────────── */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-secondary);
+}
+
+.admin-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background-color: var(--primary-dark);
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+}
+
+.admin-main {
+    flex: 1;
+    padding: var(--space-8);
+    overflow-x: hidden;
+}
+
+@media (max-width: 991px) {
+    .admin-sidebar {
+        width: 100%;
+        position: static;
+        min-height: auto;
+    }
+
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-main {
+        padding: var(--space-4);
+    }
+}
+
+/* ── FOOTER LAYOUT ───────────────────────────────────────── */
+.footer-am {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    padding-top: var(--space-16);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+    gap: var(--space-8);
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--footer-border);
+    padding-block: var(--space-6);
+    margin-top: var(--space-12);
+}
+
+@media (max-width: 991px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-8);
+    }
+}
+
+@media (max-width: 575px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── CARD GRID ───────────────────────────────────────────── */
+.car-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+}
+
+@media (min-width: 1200px) {
+    .car-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 575px) {
+    .car-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── INVENTORY LAYOUT ────────────────────────────────────── */
+.inventory-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-8);
+    align-items: start;
+}
+
+.filter-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-4));
+}
+
+@media (max-width: 991px) {
+    .inventory-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-sidebar {
+        position: static;
+    }
+}
+
+/* ── STATS GRID (Admin) ──────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-6);
+}

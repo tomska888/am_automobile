@@ -1,0 +1,430 @@
+export default {
+    nav: {
+        home: 'Home',
+        inventory: 'Inventory',
+        about: 'About',
+        contact: 'Contact',
+        signIn: 'Sign In',
+        browseCars: 'Browse Cars',
+        admin: 'Admin Panel',
+        logout: 'Log Out',
+        myAccount: 'My Account',
+        profile: 'My Profile',
+        language: 'Language',
+        theme: 'Theme'
+    },
+    home: {
+        hero: {
+            badge: 'Trusted Automotive Partner',
+            title: 'Find Your Perfect Car',
+            subtitle: 'Discover premium vehicles with transparent pricing and exceptional service.',
+            cta: 'Browse Cars',
+            ctaSecondary: 'Contact Us',
+            searchMake: 'Any Make',
+            searchYear: 'Any Year',
+            searchBtn: 'Search Cars',
+            stats: {
+                cars: 'Cars in Stock',
+                brands: 'Brands',
+                customers: 'Happy Customers',
+                years: 'Years Experience',
+                verified: 'Verified Vehicles'
+            }
+        },
+        featured: {
+            tag: 'Our Fleet',
+            label: 'Featured',
+            title: 'Featured Vehicles',
+            subtitle: 'Hand-picked by our expert team — the best deals at the best prices.',
+            viewAll: 'View All Vehicles',
+            viewDetails: 'View Details',
+            badgeFeatured: 'Featured',
+            badgeNew: 'New Arrival',
+            badgeDeal: 'Best Deal'
+        },
+        why: {
+            tag: 'Our Promise',
+            label: 'Why Us',
+            title: 'Why Choose AM Automobile?',
+            subtitle: 'We offer more than just cars — a complete vehicle purchase experience.',
+            items: [
+                { title: 'Verified Quality', desc: 'Every car undergoes a thorough 150-point inspection by certified mechanics before listing.' },
+                { title: 'Best Prices', desc: 'Transparent pricing with no hidden fees. We guarantee the best market rates on every vehicle.' },
+                { title: 'Warranty Included', desc: 'All vehicles come with a minimum 12-month warranty for complete peace of mind.' },
+                { title: 'Expert Support', desc: 'Our team of automotive experts is here to guide you every step of the way.' }
+            ]
+        },
+        how: {
+            tag: 'Simple Process',
+            title: 'How It Works',
+            steps: [
+                { title: 'Browse', desc: 'Search our extensive inventory using advanced filters to find your perfect match.' },
+                { title: 'Choose', desc: 'Find your perfect vehicle and schedule a complimentary test drive at your convenience.' },
+                { title: 'Drive Away', desc: 'Complete simple paperwork, handle financing if needed, and drive home in your new car.' }
+            ]
+        },
+        testimonials: {
+            tag: 'Reviews',
+            title: 'What Our Customers Say',
+            items: [
+                { text: 'Amazing service! Found my dream BMW within a week. The team was incredibly professional and made the whole process seamless.' },
+                { text: 'Very professional team. They helped me find the perfect Audi A4 within my budget. Highly recommended to anyone looking for quality cars!' },
+                { text: 'Best car buying experience I\'ve ever had. No pressure, transparent pricing, and they even handled all the paperwork. Excellent!' }
+            ]
+        },
+        cta: {
+            title: 'Ready to Find Your Dream Car?',
+            subtitle: 'Browse our full inventory of 500+ verified vehicles.',
+            browse: 'Browse Inventory',
+            contact: 'Contact Us',
+            primary: 'Browse Cars',
+            secondary: 'Call Us'
+        }
+    },
+    inventory: {
+        title: 'Our Inventory',
+        subtitle: 'Browse our wide selection of vehicles',
+        searchPlaceholder: 'Search make, model...',
+        filters: {
+            title: 'Filters',
+            make: 'Make',
+            model: 'Model',
+            yearFrom: 'Year from',
+            yearTo: 'Year to',
+            priceFrom: 'Price from (EUR)',
+            priceTo: 'Price to (EUR)',
+            fuelType: 'Fuel Type',
+            transmission: 'Transmission',
+            bodyType: 'Body Type',
+            apply: 'Apply Filters',
+            reset: 'Clear All',
+            activeFilters: 'Active filters'
+        },
+        sort: {
+            label: 'Sort by',
+            newest: 'Newest first',
+            oldest: 'Oldest first',
+            priceAsc: 'Price: low to high',
+            priceDesc: 'Price: high to low',
+            yearDesc: 'Year: newest first',
+            yearAsc: 'Year: oldest first'
+        },
+        results: '{count} results',
+        noResults: 'No Results Found',
+        noResultsDesc: 'Try adjusting your search criteria.',
+        loading: 'Loading cars...'
+    },
+    car: {
+        viewDetails: 'View Details',
+        contactAbout: 'Ask About This Car',
+        make: 'Make',
+        model: 'Model',
+        year: 'Year',
+        price: 'Price',
+        mileage: 'Mileage',
+        fuelType: 'Fuel Type',
+        transmission: 'Transmission',
+        bodyType: 'Body Type',
+        color: 'Color',
+        doors: 'Doors',
+        seats: 'Seats',
+        engine: 'Engine',
+        engineSize: 'Engine Size',
+        power: 'Power',
+        features: 'Features',
+        description: 'Description',
+        statusLabel: 'Status',
+        status: {
+            available: 'Available',
+            sold: 'Sold',
+            reserved: 'Reserved',
+            archived: 'Archived',
+            featured: 'Featured'
+        },
+        fuel: {
+            petrol: 'Petrol',
+            diesel: 'Diesel',
+            electric: 'Electric',
+            hybrid: 'Hybrid',
+            lpg: 'LPG'
+        },
+        trans: {
+            manual: 'Manual',
+            automatic: 'Automatic',
+            semiAuto: 'Semi-Automatic'
+        },
+        body: {
+            sedan: 'Sedan',
+            suv: 'SUV',
+            hatchback: 'Hatchback',
+            combi: 'Estate',
+            coupe: 'Coupe',
+            cabrio: 'Convertible',
+            van: 'Van',
+            pickup: 'Pickup'
+        }
+    },
+    about: {
+        title: 'About Us',
+        subtitle: 'Meet AM Automobile',
+        story: {
+            label: 'Our Story',
+            title: 'A Passion for Cars',
+            text1: 'AM Automobile is a family-owned dealership with years of experience in the automotive market. Our mission is to help customers find the perfect vehicle at the best price.',
+            text2: 'We offer a wide selection of used and new cars, financing, insurance, and after-sales service. We prioritize transparency and honesty in every transaction.'
+        },
+        team: {
+            label: 'Our Team',
+            title: 'Meet Our Experts'
+        },
+        values: {
+            label: 'Our Values',
+            title: 'What Sets Us Apart'
+        }
+    },
+    contact: {
+        title: 'Contact',
+        subtitle: 'We\'re Here for You',
+        form: {
+            title: 'Send a Message',
+            name: 'Full Name',
+            email: 'Email Address',
+            phone: 'Phone Number',
+            subject: 'Subject',
+            message: 'Message',
+            send: 'Send Message',
+            sending: 'Sending...',
+            success: 'Message sent! We\'ll get back to you soon.',
+            error: 'Failed to send. Please try again.'
+        },
+        info: {
+            address: 'Address',
+            phone: 'Phone',
+            email: 'Email',
+            hours: 'Opening Hours',
+            hoursVal: 'Mon–Fri 9:00–18:00, Sat 10:00–15:00'
+        },
+        map: {
+            title: 'Our Location',
+            directions: 'Get Directions'
+        }
+    },
+    auth: {
+        login: {
+            title: 'Sign In',
+            subtitle: 'Welcome back to AM Automobile',
+            email: 'Email Address',
+            password: 'Password',
+            remember: 'Remember me',
+            forgotPass: 'Forgot password?',
+            submit: 'Sign In',
+            submitting: 'Signing in...',
+            noAccount: 'Don\'t have an account?',
+            register: 'Register',
+            error: 'Invalid email or password'
+        },
+        register: {
+            title: 'Create Account',
+            subtitle: 'Join AM Automobile',
+            name: 'Full Name',
+            email: 'Email Address',
+            password: 'Password',
+            confirmPass: 'Confirm Password',
+            submit: 'Create Account',
+            submitting: 'Creating account...',
+            hasAccount: 'Already have an account?',
+            login: 'Sign In',
+            termsText: 'By registering you agree to our',
+            terms: 'Terms of Service',
+            and: 'and',
+            privacy: 'Privacy Policy'
+        },
+        validation: {
+            required: 'This field is required',
+            emailInvalid: 'Please enter a valid email address',
+            passMin: 'Password must be at least 8 characters',
+            passMatch: 'Passwords do not match'
+        }
+    },
+    admin: {
+        title: 'Admin Panel',
+        dashboard: {
+            title: 'Dashboard',
+            totalCars: 'Total Cars',
+            available: 'Available',
+            sold: 'Sold',
+            users: 'Users',
+            messages: 'Messages',
+            recentCars: 'Recently Added'
+        },
+        cars: {
+            title: 'Car Management',
+            add: 'Add Car',
+            addCar: 'Add New Car',
+            editCar: 'Edit Car',
+            edit: 'Edit',
+            delete: 'Delete',
+            deleteConfirm: 'Are you sure you want to delete this car?'
+        },
+        messages: {
+            title: 'Messages',
+            from: 'From',
+            subject: 'Subject',
+            date: 'Date',
+            status: 'Status',
+            markRead: 'Mark as Read',
+            reply: 'Reply',
+            statuses: {
+                new: 'New',
+                read: 'Read',
+                replied: 'Replied'
+            }
+        },
+        users: {
+            title: 'Users',
+            name: 'Name',
+            email: 'Email',
+            role: 'Role',
+            status: 'Status',
+            active: 'Active',
+            inactive: 'Inactive',
+            toggle: 'Toggle Status'
+        }
+    },
+    footer: {
+        tagline: 'Your trusted automotive partner since 2014.',
+        company: 'Company',
+        inventory: 'Inventory',
+        support: 'Support',
+        legal: 'Legal',
+        newsletter: {
+            title: 'Stay Updated',
+            subtitle: 'Get notified about new arrivals and special offers.',
+            placeholder: 'Your email address',
+            subscribe: 'Subscribe'
+        },
+        links: {
+            about: 'About Us',
+            team: 'Our Team',
+            careers: 'Careers',
+            blog: 'Blog',
+            allCars: 'All Cars',
+            byMake: 'By Make',
+            byType: 'By Type',
+            featured: 'Featured',
+            contact: 'Contact',
+            faq: 'FAQ',
+            financing: 'Financing',
+            testDrive: 'Test Drive',
+            tos: 'Terms of Service',
+            privacy: 'Privacy Policy',
+            cookies: 'Cookie Policy'
+        },
+        copyright: '© {year} AM Automobile. All rights reserved.'
+    },
+    legal: {
+        tos: {
+            title: 'Terms of Service',
+            subtitle: 'Terms and conditions for using AM Automobile services'
+        },
+        privacy: {
+            title: 'Privacy Policy',
+            subtitle: 'How we protect your personal data'
+        },
+        cookies: {
+            title: 'Cookie Policy',
+            subtitle: 'Information about cookies used on our website'
+        }
+    },
+    common: {
+        loading: 'Loading...',
+        error: 'An error occurred',
+        retry: 'Try Again',
+        save: 'Save',
+        cancel: 'Cancel',
+        close: 'Close',
+        confirm: 'Confirm',
+        delete: 'Delete',
+        edit: 'Edit',
+        add: 'Add',
+        search: 'Search',
+        filter: 'Filter',
+        reset: 'Reset',
+        viewAll: 'View All',
+        back: 'Back',
+        next: 'Next',
+        previous: 'Previous',
+        page: 'Page',
+        of: 'of',
+        yes: 'Yes',
+        no: 'No',
+        noData: 'No data available',
+        km: 'km',
+        pln: 'EUR',
+        hp: 'HP',
+        cc: 'cc',
+        saving: 'Saving...'
+    },
+    theme: {
+        light: 'Light',
+        dark: 'Dark',
+        system: 'System'
+    },
+    profile: {
+        nav: 'Profile navigation',
+        editProfile: 'Edit Profile',
+        editProfileSub: 'Update your name and email address',
+        security: 'Security',
+        securitySub: 'Change your password to keep your account secure',
+        dangerZone: 'Session',
+        dangerZoneSub: 'Sign out from your account',
+        fullName: 'Full Name',
+        fullNamePlaceholder: 'Your full name',
+        email: 'Email Address',
+        emailPlaceholder: 'your@email.com',
+        saveChanges: 'Save Changes',
+        currentPassword: 'Current Password',
+        currentPasswordPlaceholder: 'Enter current password',
+        newPassword: 'New Password',
+        newPasswordPlaceholder: 'Enter new password',
+        confirmPassword: 'Confirm New Password',
+        confirmPasswordPlaceholder: 'Repeat new password',
+        updatePassword: 'Update Password',
+        togglePassword: 'Toggle password visibility',
+        logout: 'Sign Out',
+        logoutDesc: 'You will be signed out from your current session.',
+        memberSince: 'Member Since',
+        accountId: 'Account ID',
+        status: 'Status',
+        statusActive: 'Active',
+        roleAdmin: 'Administrator',
+        roleUser: 'Member',
+        profileUpdated: 'Profile updated successfully.',
+        passwordUpdated: 'Password changed successfully.',
+        nameRequired: 'Full name is required',
+        nameTooShort: 'Name must be at least 2 characters',
+        emailRequired: 'Email address is required',
+        emailInvalid: 'Please enter a valid email',
+        currentPasswordRequired: 'Current password is required',
+        newPasswordRequired: 'New password is required',
+        confirmPasswordRequired: 'Please confirm your new password',
+        passwordMismatch: 'Passwords do not match',
+        editProfileDesc: 'Update your display name and email address',
+        securityDesc: 'Change your password to keep your account secure',
+        dangerZoneDesc: 'Actions in this section are permanent',
+        signOut: 'Sign Out',
+        signOutDesc: 'You will be signed out from your current session on this device.',
+        updateSuccess: 'Profile updated successfully.',
+        updateError: 'Could not update profile. Please try again.',
+        passwordSuccess: 'Password changed successfully.',
+        passwordError: 'Could not change password. Please try again.',
+        changePassword: 'Change Password',
+        strengthWeak: 'Weak',
+        strengthFair: 'Fair',
+        strengthGood: 'Good',
+        strengthStrong: 'Strong',
+        req8Chars: 'At least 8 characters',
+        reqUppercase: 'At least one uppercase letter',
+        reqNumber: 'At least one number'
+    }
+}

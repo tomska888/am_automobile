@@ -1,0 +1,430 @@
+export default {
+    nav: {
+        home: 'Pagrindinis',
+        inventory: 'Automobiliai',
+        about: 'Apie mus',
+        contact: 'Kontaktai',
+        signIn: 'Prisijungti',
+        browseCars: 'Naršyti automobilius',
+        admin: 'Administravimas',
+        logout: 'Atsijungti',
+        myAccount: 'Mano paskyra',
+        profile: 'Mano profilis',
+        language: 'Kalba',
+        theme: 'Tema'
+    },
+    home: {
+        hero: {
+            badge: 'Patikimas automobilių partneris',
+            title: 'Raskite savo tobulą automobilį',
+            subtitle: 'Atraskite aukščiausios kokybės transporto priemones su skaidriomis kainomis ir puikiu aptarnavimu.',
+            cta: 'Naršyti automobilius',
+            ctaSecondary: 'Susisiekti',
+            searchMake: 'Bet kuri markė',
+            searchYear: 'Bet kuriais metais',
+            searchBtn: 'Ieškoti',
+            stats: {
+                cars: 'Automobilių sandėlyje',
+                brands: 'Markių',
+                customers: 'Patenkintų klientų',
+                years: 'Patirties metų',
+                verified: 'Patikrintų automobilių'
+            }
+        },
+        featured: {
+            tag: 'Mūsų parkas',
+            label: 'Rekomenduojami',
+            title: 'Rekomenduojami automobiliai',
+            subtitle: 'Atrinkti mūsų ekspertų komandos — geriausi pasiūlymai už geriausias kainas.',
+            viewAll: 'Žiūrėti visus automobilius',
+            viewDetails: 'Peržiūrėti',
+            badgeFeatured: 'Rekomenduojamas',
+            badgeNew: 'Naujas',
+            badgeDeal: 'Geriausias pasiūlymas'
+        },
+        why: {
+            tag: 'Mūsų pažadas',
+            label: 'Kodėl mes',
+            title: 'Kodėl AM Automobile?',
+            subtitle: 'Siūlome ne tik automobilius, bet ir visapusišką pirkimo patirtį.',
+            items: [
+                { title: 'Patikrinta kokybė', desc: 'Kiekvienas automobilis praeina 150 taškų patikrą sertifikuotų mechanikų prieš pateikiant pardavimui.' },
+                { title: 'Geriausios kainos', desc: 'Skaidrios kainos be paslėptų mokesčių. Garantuojame geriausias rinkos kainas.' },
+                { title: 'Garantija įskaičiuota', desc: 'Visi automobiliai turi bent 12 mėnesių garantiją jūsų ramybei.' },
+                { title: 'Ekspertų pagalba', desc: 'Mūsų automobilių ekspertų komanda padės jums kiekviename žingsnyje.' }
+            ]
+        },
+        how: {
+            tag: 'Paprastas procesas',
+            title: 'Kaip tai veikia',
+            steps: [
+                { title: 'Naršykite', desc: 'Ieškokite mūsų plataus asortimento naudodami išplėstinius filtrus, kad rastumėte tobulą automobilį.' },
+                { title: 'Pasirinkite', desc: 'Raskite tobulą automobilį ir užsirašykite nemokamą bandomąją važiavimą jums patogiu laiku.' },
+                { title: 'Važiuokite', desc: 'Užpildykite paprastus dokumentus, jei reikia, pasinaudokite finansavimu ir grįžkite savo nauju automobiliu.' }
+            ]
+        },
+        testimonials: {
+            tag: 'Atsiliepimai',
+            title: 'Ką sako mūsų klientai',
+            items: [
+                { text: 'Nuostabus aptarnavimas! Radau savo svajonių BMW per savaitę. Komanda buvo nepaprastai profesionali ir visas procesas vyko sklandžiai.' },
+                { text: 'Labai profesionali komanda. Padėjo man rasti tobulą Audi A4 pagal mano biudžetą. Rekomenduoju visiems ieškantiems kokybiško automobilio!' },
+                { text: 'Geriausia automobilio pirkimo patirtis, kurią kada nors turėjau. Jokio spaudimo, skaidrios kainos ir net tvarkė visus dokumentus. Puiku!' }
+            ]
+        },
+        cta: {
+            title: 'Pasiruošę rasti savo automobilį?',
+            subtitle: 'Naršykite mūsų 500+ patikrintų transporto priemonių.',
+            browse: 'Naršyti',
+            contact: 'Susisiekti',
+            primary: 'Naršyti automobilius',
+            secondary: 'Skambinti'
+        }
+    },
+    inventory: {
+        title: 'Mūsų pasiūla',
+        subtitle: 'Naršykite mūsų platų automobilių pasirinkimą',
+        searchPlaceholder: 'Ieškoti markės, modelio...',
+        filters: {
+            title: 'Filtrai',
+            make: 'Markė',
+            model: 'Modelis',
+            yearFrom: 'Metai nuo',
+            yearTo: 'Metai iki',
+            priceFrom: 'Kaina nuo (EUR)',
+            priceTo: 'Kaina iki (EUR)',
+            fuelType: 'Degalų tipas',
+            transmission: 'Pavarų dėžė',
+            bodyType: 'Kėbulo tipas',
+            apply: 'Taikyti filtrus',
+            reset: 'Išvalyti',
+            activeFilters: 'Aktyvūs filtrai'
+        },
+        sort: {
+            label: 'Rūšiuoti',
+            newest: 'Naujausi pirma',
+            oldest: 'Seniausi pirma',
+            priceAsc: 'Kaina: didėjančiai',
+            priceDesc: 'Kaina: mažėjančiai',
+            yearDesc: 'Metai: naujausi pirma',
+            yearAsc: 'Metai: seniausi pirma'
+        },
+        results: '{count} rezultatų',
+        noResults: 'Rezultatų nerasta',
+        noResultsDesc: 'Pabandykite pakeisti paieškos kriterijus.',
+        loading: 'Kraunami automobiliai...'
+    },
+    car: {
+        viewDetails: 'Išsamiau',
+        contactAbout: 'Teirautis apie šį automobilį',
+        make: 'Markė',
+        model: 'Modelis',
+        year: 'Metai',
+        price: 'Kaina',
+        mileage: 'Rida',
+        fuelType: 'Degalai',
+        transmission: 'Pavarų dėžė',
+        bodyType: 'Kėbulas',
+        color: 'Spalva',
+        doors: 'Durys',
+        seats: 'Vietos',
+        engine: 'Variklis',
+        engineSize: 'Variklio tūris',
+        power: 'Galia',
+        features: 'Įranga',
+        description: 'Aprašymas',
+        statusLabel: 'Būsena',
+        status: {
+            available: 'Galimas',
+            sold: 'Parduotas',
+            reserved: 'Rezervuotas',
+            archived: 'Archyvuotas',
+            featured: 'Rekomenduojamas'
+        },
+        fuel: {
+            petrol: 'Benzinas',
+            diesel: 'Dyzelis',
+            electric: 'Elektrinis',
+            hybrid: 'Hibridas',
+            lpg: 'Dujos'
+        },
+        trans: {
+            manual: 'Mechaninė',
+            automatic: 'Automatinė',
+            semiAuto: 'Pusiau automatinė'
+        },
+        body: {
+            sedan: 'Sedanas',
+            suv: 'Visureigis',
+            hatchback: 'Hečbekas',
+            combi: 'Universalas',
+            coupe: 'Kupė',
+            cabrio: 'Kabrioletas',
+            van: 'Furgonas',
+            pickup: 'Pikapas'
+        }
+    },
+    about: {
+        title: 'Apie mus',
+        subtitle: 'Susipažinkite su AM Automobile',
+        story: {
+            label: 'Mūsų istorija',
+            title: 'Aistra automobiliams metų metais',
+            text1: 'AM Automobile — tai šeimos automobilių salonas su daugiamete patirtimi automobilių rinkoje. Mūsų misija — padėti klientams rasti tobulą automobilį už geriausią kainą.',
+            text2: 'Siūlome platų naudotų ir naujų automobilių pasirinkimą, finansavimą, draudimą ir aptarnavimą po pardavimo. Kiekviename sandoryje vertiname skaidrumą ir sąžiningumą.'
+        },
+        team: {
+            label: 'Mūsų komanda',
+            title: 'Susipažinkite su mūsų ekspertais'
+        },
+        values: {
+            label: 'Mūsų vertybės',
+            title: 'Kas mus išskiria'
+        }
+    },
+    contact: {
+        title: 'Kontaktai',
+        subtitle: 'Esame čia jums',
+        form: {
+            title: 'Siųsti žinutę',
+            name: 'Vardas ir pavardė',
+            email: 'El. pašto adresas',
+            phone: 'Telefono numeris',
+            subject: 'Tema',
+            message: 'Žinutė',
+            send: 'Siųsti žinutę',
+            sending: 'Siunčiama...',
+            success: 'Žinutė išsiųsta! Susisieksime su jumis netrukus.',
+            error: 'Nepavyko išsiųsti. Bandykite dar kartą.'
+        },
+        info: {
+            address: 'Adresas',
+            phone: 'Telefonas',
+            email: 'El. paštas',
+            hours: 'Darbo laikas',
+            hoursVal: 'Pir–Pen 9:00–18:00, Šeš 10:00–15:00'
+        },
+        map: {
+            title: 'Mūsų vieta',
+            directions: 'Kaip mus rasti'
+        }
+    },
+    auth: {
+        login: {
+            title: 'Prisijungti',
+            subtitle: 'Sveiki sugrįžę į AM Automobile',
+            email: 'El. pašto adresas',
+            password: 'Slaptažodis',
+            remember: 'Prisiminti mane',
+            forgotPass: 'Pamiršote slaptažodį?',
+            submit: 'Prisijungti',
+            submitting: 'Jungiamasi...',
+            noAccount: 'Neturite paskyros?',
+            register: 'Registruotis',
+            error: 'Neteisingas el. paštas arba slaptažodis'
+        },
+        register: {
+            title: 'Sukurti paskyrą',
+            subtitle: 'Prisijunkite prie AM Automobile',
+            name: 'Vardas ir pavardė',
+            email: 'El. pašto adresas',
+            password: 'Slaptažodis',
+            confirmPass: 'Patvirtinti slaptažodį',
+            submit: 'Sukurti paskyrą',
+            submitting: 'Kuriama paskyra...',
+            hasAccount: 'Jau turite paskyrą?',
+            login: 'Prisijungti',
+            termsText: 'Registruodamiesi sutinkate su mūsų',
+            terms: 'Naudojimo taisyklėmis',
+            and: 'ir',
+            privacy: 'Privatumo politika'
+        },
+        validation: {
+            required: 'Šis laukas yra privalomas',
+            emailInvalid: 'Įveskite teisingą el. pašto adresą',
+            passMin: 'Slaptažodis turi būti bent 8 simbolių',
+            passMatch: 'Slaptažodžiai nesutampa'
+        }
+    },
+    admin: {
+        title: 'Administravimo skydelis',
+        dashboard: {
+            title: 'Informacinis skydelis',
+            totalCars: 'Iš viso automobilių',
+            available: 'Galimi',
+            sold: 'Parduoti',
+            users: 'Vartotojai',
+            messages: 'Žinutės',
+            recentCars: 'Neseniai pridėti'
+        },
+        cars: {
+            title: 'Automobilių valdymas',
+            add: 'Pridėti automobilį',
+            addCar: 'Pridėti naują automobilį',
+            editCar: 'Redaguoti automobilį',
+            edit: 'Redaguoti',
+            delete: 'Ištrinti',
+            deleteConfirm: 'Ar tikrai norite ištrinti šį automobilį?'
+        },
+        messages: {
+            title: 'Žinutės',
+            from: 'Nuo',
+            subject: 'Tema',
+            date: 'Data',
+            status: 'Būsena',
+            markRead: 'Žymėti kaip perskaitytą',
+            reply: 'Atsakyti',
+            statuses: {
+                new: 'Nauja',
+                read: 'Perskaityta',
+                replied: 'Atsakyta'
+            }
+        },
+        users: {
+            title: 'Vartotojai',
+            name: 'Vardas',
+            email: 'El. paštas',
+            role: 'Vaidmuo',
+            status: 'Būsena',
+            active: 'Aktyvus',
+            inactive: 'Neaktyvus',
+            toggle: 'Keisti būseną'
+        }
+    },
+    footer: {
+        tagline: 'Jūsų patikimas automobilių partneris nuo 2014 m.',
+        company: 'Įmonė',
+        inventory: 'Pasiūla',
+        support: 'Pagalba',
+        legal: 'Teisinė informacija',
+        newsletter: {
+            title: 'Būkite informuoti',
+            subtitle: 'Gaukite pranešimus apie naujus automobilius ir specialius pasiūlymus.',
+            placeholder: 'Jūsų el. pašto adresas',
+            subscribe: 'Prenumeruoti'
+        },
+        links: {
+            about: 'Apie mus',
+            team: 'Mūsų komanda',
+            careers: 'Karjera',
+            blog: 'Tinklaraštis',
+            allCars: 'Visi automobiliai',
+            byMake: 'Pagal markę',
+            byType: 'Pagal tipą',
+            featured: 'Rekomenduojami',
+            contact: 'Kontaktai',
+            faq: 'DUK',
+            financing: 'Finansavimas',
+            testDrive: 'Bandomasis važiavimas',
+            tos: 'Naudojimo taisyklės',
+            privacy: 'Privatumo politika',
+            cookies: 'Slapukų politika'
+        },
+        copyright: '© {year} AM Automobile. Visos teisės saugomos.'
+    },
+    legal: {
+        tos: {
+            title: 'Naudojimo taisyklės',
+            subtitle: 'AM Automobile paslaugų naudojimo sąlygos'
+        },
+        privacy: {
+            title: 'Privatumo politika',
+            subtitle: 'Kaip saugome jūsų asmens duomenis'
+        },
+        cookies: {
+            title: 'Slapukų politika',
+            subtitle: 'Informacija apie mūsų svetainėje naudojamus slapukus'
+        }
+    },
+    common: {
+        noData: 'Nėra duomenų',
+        loading: 'Kraunama...',
+        error: 'Įvyko klaida',
+        retry: 'Bandyti dar kartą',
+        save: 'Išsaugoti',
+        cancel: 'Atšaukti',
+        close: 'Uždaryti',
+        confirm: 'Patvirtinti',
+        delete: 'Ištrinti',
+        edit: 'Redaguoti',
+        add: 'Pridėti',
+        search: 'Ieškoti',
+        filter: 'Filtruoti',
+        reset: 'Išvalyti',
+        viewAll: 'Žiūrėti viską',
+        back: 'Atgal',
+        next: 'Toliau',
+        previous: 'Atgal',
+        page: 'Puslapis',
+        of: 'iš',
+        yes: 'Taip',
+        no: 'Ne',
+        km: 'km',
+        pln: 'EUR',
+        hp: 'AG',
+        cc: 'cm³',
+        saving: 'Išsaugoma...'
+    },
+    theme: {
+        light: 'Šviesi',
+        dark: 'Tamsi',
+        system: 'Sisteminė'
+    },
+    profile: {
+        nav: 'Profilio navigacija',
+        editProfile: 'Redaguoti profilį',
+        editProfileSub: 'Atnaujinkite savo vardą ir el. paštą',
+        security: 'Saugumas',
+        securitySub: 'Pakeiskite slaptažodį, kad apsaugotumėte paskyrą',
+        dangerZone: 'Sesija',
+        dangerZoneSub: 'Atsijunkite nuo savo paskyros',
+        fullName: 'Vardas ir pavardė',
+        fullNamePlaceholder: 'Jūsų vardas ir pavardė',
+        email: 'El. pašto adresas',
+        emailPlaceholder: 'jusu@epastas.lt',
+        saveChanges: 'Išsaugoti pakeitimus',
+        currentPassword: 'Dabartinis slaptažodis',
+        currentPasswordPlaceholder: 'Įveskite dabartinį slaptažodį',
+        newPassword: 'Naujas slaptažodis',
+        newPasswordPlaceholder: 'Įveskite naują slaptažodį',
+        confirmPassword: 'Patvirtinkite naują slaptažodį',
+        confirmPasswordPlaceholder: 'Pakartokite naują slaptažodį',
+        updatePassword: 'Atnaujinti slaptažodį',
+        togglePassword: 'Rodyti/slėpti slaptažodį',
+        logout: 'Atsijungti',
+        logoutDesc: 'Būsite atjungti nuo dabartinės sesijos.',
+        memberSince: 'Narys nuo',
+        accountId: 'Paskyros ID',
+        status: 'Statusas',
+        statusActive: 'Aktyvus',
+        roleAdmin: 'Administratorius',
+        roleUser: 'Narys',
+        profileUpdated: 'Profilis sėkmingai atnaujintas.',
+        passwordUpdated: 'Slaptažodis sėkmingai pakeistas.',
+        nameRequired: 'Vardas ir pavardė yra privalomi',
+        nameTooShort: 'Vardas turi būti bent 2 simbolių',
+        emailRequired: 'El. pašto adresas yra privalomas',
+        emailInvalid: 'Įveskite teisingą el. paštą',
+        currentPasswordRequired: 'Dabartinis slaptažodis yra privalomas',
+        newPasswordRequired: 'Naujas slaptažodis yra privalomas',
+        confirmPasswordRequired: 'Patvirtinkite naują slaptažodį',
+        passwordMismatch: 'Slaptažodžiai nesutampa',
+        editProfileDesc: 'Atnaujinkite savo vardą ir el. pašto adresą',
+        securityDesc: 'Pakeiskite slaptažodį, kad apsaugotumėte paskyrą',
+        dangerZoneDesc: 'Veiksmai šiame skyriuje yra neatšaukiami',
+        signOut: 'Atsijungti',
+        signOutDesc: 'Būsite atjungti nuo dabartinės sesijos šiame įrenginyje.',
+        updateSuccess: 'Profilis sėkmingai atnaujintas.',
+        updateError: 'Nepavyko atnaujinti profilio. Bandykite dar kartą.',
+        passwordSuccess: 'Slaptažodis sėkmingai pakeistas.',
+        passwordError: 'Nepavyko pakeisti slaptažodžio. Bandykite dar kartą.',
+        changePassword: 'Keisti slaptažodį',
+        strengthWeak: 'Silpnas',
+        strengthFair: 'Vidutinis',
+        strengthGood: 'Geras',
+        strengthStrong: 'Stiprus',
+        req8Chars: 'Bent 8 simboliai',
+        reqUppercase: 'Bent viena didžioji raidė',
+        reqNumber: 'Bent vienas skaičius'
+    }
+}
