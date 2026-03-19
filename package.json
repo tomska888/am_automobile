@@ -1,20 +1,53 @@
 {
-    "name": "am-automobile-monorepo",
+    "name": "am-automobile",
     "version": "1.0.0",
     "private": true,
-    "description": "AM Automobile — Full Stack Car Dealership Website (Monorepo)",
+    "type": "module",
+    "description": "AM Automobile — Vue 3 + Vite frontend, Node.js + Express + MySQL backend",
     "scripts": {
-        "dev": "concurrently --kill-others-on-fail --names \"CLIENT,SERVER\" --prefix-colors \"cyan,yellow\" \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-        "setup": "npm install --prefix client && npm install --prefix server",
-        "build": "npm run build --prefix client",
-        "start": "npm run start --prefix server",
-        "lint": "npm run lint --prefix client"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "start": "node server/server.js",
+        "server:dev": "nodemon server/server.js",
+        "lint": "eslint client --ext .vue,.js --fix"
+    },
+    "dependencies": {
+        "axios": "^1.6.8",
+        "pinia": "^2.1.7",
+        "vue": "^3.4.21",
+        "vue-i18n": "^9.10.2",
+        "vue-router": "^4.3.0",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "express-rate-limit": "^7.3.1",
+        "express-session": "^1.18.0",
+        "helmet": "^7.1.0",
+        "mysql2": "^3.9.8",
+        "nodemailer": "^8.0.3",
+        "validator": "^13.12.0"
     },
     "devDependencies": {
-        "concurrently": "^8.2.2"
+        "@vitejs/plugin-vue": "^5.0.4",
+        "concurrently": "^8.2.2",
+        "eslint": "^8.57.0",
+        "eslint-plugin-vue": "^9.23.0",
+        "nodemon": "^3.1.3",
+        "vite": "^5.2.0"
     },
     "engines": {
         "node": ">=18.0.0",
         "npm": ">=9.0.0"
-    }
+    },
+    "keywords": [
+        "car-dealership",
+        "vue",
+        "vite",
+        "express",
+        "mysql"
+    ],
+    "author": "AM Automobile",
+    "license": "UNLICENSED"
 }
