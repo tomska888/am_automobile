@@ -10,9 +10,14 @@ const publicIndex = path.join(__dirname, 'server', 'public', 'index.html')
 if (!fs.existsSync(publicIndex)) {
   console.log('🔨  Building Vue client (first run or missing build)...')
   try {
-    execSync('npm install --prefix client && npm run build --prefix client', {
-      cwd: __dirname,
-      stdio: 'inherit'
+    // Use node to run vite directly — avoids npm PATH issues on Hostinger
+    const viteBin = path.join(__dirname, 'node_modules', '.bin', 'vite')
+    const clientDir = path.join(__dirname, 'client')
+
+    execSync(`node "${viteBin}" build`, {
+      cwd: clientDir,
+      stdio: 'inherit',
+      env: { ...process.env, NODE_ENV: 'production' }
     })
     console.log('✅  Vue client build complete.')
   } catch (err) {
