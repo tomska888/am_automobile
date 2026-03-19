@@ -10,7 +10,7 @@ server/node_modules/
 
 # ─── Build Output ─────────────────────────────────────────────
 client/dist/
-server/public/
+# server/public/ is intentionally committed — pre-built Vue assets for Hostinger
 
 # ─── Logs ─────────────────────────────────────────────────────
 *.log
