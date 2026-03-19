@@ -2,11 +2,12 @@
     "name": "am-automobile",
     "version": "1.0.0",
     "private": true,
+    "main": "server.js",
     "description": "AM Automobile — Vue 3 + Vite frontend, Node.js + Express + MySQL backend",
     "scripts": {
         "dev": "concurrently --kill-others-on-fail --names \"CLIENT,SERVER\" --prefix-colors \"cyan,yellow\" \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
         "build": "npm install --prefix client && npm run build --prefix client",
-        "start": "node server/server.js",
+        "start": "node server.js",
         "server:dev": "nodemon server/server.js",
         "lint": "eslint client --ext .vue,.js --fix"
     },
