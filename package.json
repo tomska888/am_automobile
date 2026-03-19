@@ -7,7 +7,7 @@
     "scripts": {
         "dev": "concurrently --kill-others-on-fail --names \"CLIENT,SERVER\" --prefix-colors \"cyan,yellow\" \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
         "build": "npm install --prefix client && npm run build --prefix client",
-        "start": "node server.js",
+        "start": "npm run build && node server.js",
         "server:dev": "nodemon server/server.js",
         "lint": "eslint client --ext .vue,.js --fix"
     },

@@ -7,6 +7,9 @@ const rateLimit = require('express-rate-limit')
 
 const app = express()
 
+// ─── Trust Proxy (required for Hostinger/reverse-proxy environments) ──────────
+app.set('trust proxy', 1)
+
 // ─── Security ────────────────────────────────────────────────────────────────
 app.use(
     helmet({
