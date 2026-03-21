@@ -14,6 +14,13 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin')
   const userName = computed(() => user.value?.name || '')
 
+  // ── Helpers ──────────────────────────────────────────────
+  function getFavoritesStore() {
+    // Lazy import to avoid circular dependency
+    const { useFavoritesStore } = require('@/stores/favorites.js')
+    return useFavoritesStore()
+  }
+
   // ── Actions ──────────────────────────────────────────────
   function setAuth(userData, tokenValue) {
     user.value = userData
@@ -21,6 +28,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('am-token', tokenValue)
     localStorage.setItem('am-user', JSON.stringify(userData))
     axios.defaults.headers.common['Authorization'] = `Bearer ${tokenValue}`
+    // Load favorites after authentication
+    try { getFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
   }
 
   function clearAuth() {
@@ -28,7 +37,10 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     localStorage.removeItem('am-token')
     localStorage.removeItem('am-user')
+    localStorage.removeItem('am_favorites')
     delete axios.defaults.headers.common['Authorization']
+    // Clear favorites on logout
+    try { getFavoritesStore().clearFavorites() } catch { /* silent */ }
   }
 
   function restoreSession() {
@@ -39,6 +51,8 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = storedToken
         user.value = JSON.parse(storedUser)
         axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+        // Restore favorites IDs
+        try { getFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
       } catch {
         clearAuth()
       }

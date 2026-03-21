@@ -117,6 +117,8 @@ export default {
     car: {
         viewDetails: 'Išsamiau',
         contactAbout: 'Teirautis apie šį automobilį',
+        addToFavorites: 'Pridėti į mėgstamiausius',
+        removeFromFavorites: 'Pašalinti iš mėgstamiausių',
         make: 'Markė',
         model: 'Modelis',
         year: 'Metai',
@@ -381,7 +383,7 @@ export default {
         fullName: 'Vardas ir pavardė',
         fullNamePlaceholder: 'Jūsų vardas ir pavardė',
         email: 'El. pašto adresas',
-        emailPlaceholder: 'jusu@epastas.lt',
+        emailPlaceholder: "jusu{'@'}epastas.lt",
         saveChanges: 'Išsaugoti pakeitimus',
         currentPassword: 'Dabartinis slaptažodis',
         currentPasswordPlaceholder: 'Įveskite dabartinį slaptažodį',
@@ -425,6 +427,17 @@ export default {
         strengthStrong: 'Stiprus',
         req8Chars: 'Bent 8 simboliai',
         reqUppercase: 'Bent viena didžioji raidė',
-        reqNumber: 'Bent vienas skaičius'
+        reqNumber: 'Bent vienas skaičius',
+        navigation: 'Profilio navigacija',
+        accountInfo: 'Paskyros informacija',
+        savedCars: 'Išsaugoti automobiliai',
+        myFavorites: 'Mano mėgstamiausi',
+        myFavoritesDesc: 'Automobiliai, kuriuos išsaugojote — naršykite ir tvarkykite savo pageidavimų sąrašą.',
+        favoritesCount: 'išsaugota',
+        loadingFavorites: 'Kraunami mėgstamiausi...',
+        noFavorites: 'Nėra išsaugotų automobilių',
+        noFavoritesDesc: 'Naršykite mūsų katalogą ir paspauskite širdutę ant bet kurio automobilio, kad jį išsaugotumėte.',
+        browseCars: 'Naršyti automobilius',
+        removeFavorite: 'Pašalinti'
     }
 }

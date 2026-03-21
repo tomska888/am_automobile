@@ -117,6 +117,8 @@ export default {
     car: {
         viewDetails: 'View Details',
         contactAbout: 'Ask About This Car',
+        addToFavorites: 'Save to Favorites',
+        removeFromFavorites: 'Remove from Favorites',
         make: 'Make',
         model: 'Model',
         year: 'Year',
@@ -168,7 +170,7 @@ export default {
         title: 'About Us',
         subtitle: 'Meet AM Automobile',
         story: {
-            label: 'Our Story',
+            label: 'About us',
             title: 'A Passion for Cars',
             text1: 'AM Automobile is a family-owned dealership with years of experience in the automotive market. Our mission is to help customers find the perfect vehicle at the best price.',
             text2: 'We offer a wide selection of used and new cars, financing, insurance, and after-sales service. We prioritize transparency and honesty in every transaction.'
@@ -381,7 +383,7 @@ export default {
         fullName: 'Full Name',
         fullNamePlaceholder: 'Your full name',
         email: 'Email Address',
-        emailPlaceholder: 'your@email.com',
+        emailPlaceholder: "your{'@'}email.com",
         saveChanges: 'Save Changes',
         currentPassword: 'Current Password',
         currentPasswordPlaceholder: 'Enter current password',
@@ -425,6 +427,17 @@ export default {
         strengthStrong: 'Strong',
         req8Chars: 'At least 8 characters',
         reqUppercase: 'At least one uppercase letter',
-        reqNumber: 'At least one number'
+        reqNumber: 'At least one number',
+        navigation: 'Profile navigation',
+        accountInfo: 'Account Info',
+        savedCars: 'Saved Cars',
+        myFavorites: 'My Favorites',
+        myFavoritesDesc: 'Cars you have saved for later — browse and manage your wishlist.',
+        favoritesCount: 'saved',
+        loadingFavorites: 'Loading your favorites...',
+        noFavorites: 'No saved cars yet',
+        noFavoritesDesc: 'Browse our inventory and tap the heart on any car to save it here.',
+        browseCars: 'Browse Cars',
+        removeFavorite: 'Remove'
     }
 }

@@ -117,6 +117,8 @@ export default {
     car: {
         viewDetails: 'Szczegóły',
         contactAbout: 'Zapytaj o ten samochód',
+        addToFavorites: 'Dodaj do ulubionych',
+        removeFromFavorites: 'Usuń z ulubionych',
         make: 'Marka',
         model: 'Model',
         year: 'Rok',
@@ -381,7 +383,7 @@ export default {
         fullName: 'Imię i Nazwisko',
         fullNamePlaceholder: 'Twoje imię i nazwisko',
         email: 'Adres Email',
-        emailPlaceholder: 'twoj@email.com',
+        emailPlaceholder: "twoj{'@'}email.com",
         saveChanges: 'Zapisz zmiany',
         currentPassword: 'Aktualne Hasło',
         currentPasswordPlaceholder: 'Wpisz aktualne hasło',
@@ -425,6 +427,17 @@ export default {
         strengthStrong: 'Silne',
         req8Chars: 'Co najmniej 8 znaków',
         reqUppercase: 'Co najmniej jedna wielka litera',
-        reqNumber: 'Co najmniej jedna cyfra'
+        reqNumber: 'Co najmniej jedna cyfra',
+        navigation: 'Nawigacja profilu',
+        accountInfo: 'Informacje o koncie',
+        savedCars: 'Zapisane samochody',
+        myFavorites: 'Moje ulubione',
+        myFavoritesDesc: 'Samochody, które zapisałeś — przeglądaj i zarządzaj swoją listą życzeń.',
+        favoritesCount: 'zapisane',
+        loadingFavorites: 'Ładowanie ulubionych...',
+        noFavorites: 'Brak zapisanych samochodów',
+        noFavoritesDesc: 'Przeglądaj naszą ofertę i kliknij serce na dowolnym samochodzie, aby zapisać go tutaj.',
+        browseCars: 'Przeglądaj samochody',
+        removeFavorite: 'Usuń'
     }
 }

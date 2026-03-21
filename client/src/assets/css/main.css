@@ -187,9 +187,11 @@ a:hover {
 }
 
 /* ── HORIZONTAL SCROLL FIX ───────────────────────────────── */
+/* overflow-x: clip does NOT create a new scroll container (unlike hidden),
+   so position:sticky continues to work correctly on descendant elements. */
 body,
 html {
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* ── DARK MODE BOOTSTRAP TABLE FIX ──────────────────────── */

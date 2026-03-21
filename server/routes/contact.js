@@ -17,7 +17,7 @@ router.post(
     contactLimiter,
     [
         body('name').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be 2–100 characters'),
-        body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+        body('email').isEmail({ allow_utf8_local_part: false }).toLowerCase().withMessage('Valid email required'),
         body('phone')
             .optional({ checkFalsy: true })
             .matches(/^[\d\s\+\-\(\)]{7,20}$/)

@@ -87,14 +87,6 @@ const routes = [
     ]
   },
 
-  // ── Profile ──────────────────────────────────────────────
-  {
-    path: '/profile',
-    name: 'profile',
-    component: () => import('@/views/ProfileView.vue'),
-    meta: { title: 'My Profile — AM Automobile', requiresAuth: true }
-  },
-
   // ── Legal Pages ──────────────────────────────────────────
   {
     path: '/terms',

@@ -1,66 +1,79 @@
 <template>
   <div class="profile-page">
-    <!-- Hero Header -->
+
+    <AppHeader />
+
+    <!-- ── Hero ────────────────────────────────────────────────── -->
     <div class="profile-hero">
+      <div class="profile-hero-bg-pattern"></div>
       <div class="profile-hero-inner">
         <div class="profile-avatar" :style="{ background: avatarGradient }">
-          {{ initials }}
+          <span class="avatar-initials">{{ initials }}</span>
+          <span class="avatar-ring"></span>
         </div>
         <div class="profile-hero-info">
           <h1 class="profile-name">{{ authStore.user?.name || '—' }}</h1>
-          <p class="profile-email-hero">{{ authStore.user?.email || '—' }}</p>
-          <span class="profile-role-badge" :class="authStore.isAdmin ? 'badge-admin' : 'badge-user'">
-            <i :class="authStore.isAdmin ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
-            {{ authStore.isAdmin ? $t('profile.roleAdmin') : $t('profile.roleUser') }}
-          </span>
+          <div class="profile-hero-meta">
+            <span class="profile-role-badge" :class="authStore.isAdmin ? 'badge-admin' : 'badge-user'">
+              <i :class="authStore.isAdmin ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
+              {{ authStore.isAdmin ? $t('profile.roleAdmin') : $t('profile.roleUser') }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ── Content Layout ───────────────────────────────────────── -->
     <div class="profile-layout">
+
       <!-- Sidebar Nav -->
       <aside class="profile-sidebar">
-        <nav class="profile-nav">
+        <nav class="profile-nav" role="tablist" :aria-label="$t('profile.navigation')">
           <button
             v-for="tab in tabs"
             :key="tab.id"
             class="profile-nav-item"
             :class="{ active: activeTab === tab.id }"
+            :aria-selected="activeTab === tab.id"
+            role="tab"
             @click="activeTab = tab.id"
           >
-            <i :class="tab.icon"></i>
-            <span>{{ $t(tab.label) }}</span>
+            <span class="nav-icon"><i :class="tab.icon"></i></span>
+            <span class="nav-label">{{ $t(tab.label) }}</span>
+            <span v-if="tab.id === 'favorites' && favStore.count > 0" class="nav-badge">
+              {{ favStore.count }}
+            </span>
           </button>
         </nav>
 
-        <!-- Account Info Card -->
+        <!-- Quick Account Info -->
         <div class="profile-info-card">
-          <div class="info-card-row">
-            <span class="info-card-label">{{ $t('profile.memberSince') }}</span>
-            <span class="info-card-value">{{ memberSince }}</span>
-          </div>
+          <div class="info-card-title">{{ $t('profile.accountInfo') }}</div>
           <div class="info-card-row">
             <span class="info-card-label">{{ $t('profile.accountId') }}</span>
             <span class="info-card-value">#{{ authStore.user?.id || '—' }}</span>
           </div>
           <div class="info-card-row">
-            <span class="info-card-label">{{ $t('profile.status') }}</span>
-            <span class="info-card-value status-active">
-              <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i>
-              {{ $t('profile.statusActive') }}
-            </span>
+            <span class="info-card-label">{{ $t('profile.memberSince') }}</span>
+            <span class="info-card-value">{{ memberSince }}</span>
           </div>
         </div>
       </aside>
 
-      <!-- Main Content -->
-      <main class="profile-main">
+      <!-- Main content -->
+      <main class="profile-main" role="main">
         <Transition name="tab-fade" mode="out-in">
-          <!-- Edit Profile Tab -->
+
+          <!-- ── Edit Profile Tab ──────────────────────────────── -->
           <div v-if="activeTab === 'edit'" key="edit" class="profile-card">
             <div class="profile-card-header">
-              <h2><i class="fa-solid fa-user-pen"></i> {{ $t('profile.editProfile') }}</h2>
-              <p>{{ $t('profile.editProfileDesc') }}</p>
+              <div class="card-header-icon" style="background: rgba(26,86,219,0.1); color: #1a56db;">
+                <i class="fa-solid fa-user-pen"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.editProfile') }}</h2>
+                <p>{{ $t('profile.editProfileDesc') }}</p>
+              </div>
             </div>
 
             <Transition name="banner-fade">
@@ -75,40 +88,42 @@
             </Transition>
 
             <form class="profile-form" @submit.prevent="saveProfile">
-              <div class="form-field">
-                <label class="form-label" for="prof-name">{{ $t('profile.fullName') }}</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-user input-icon"></i>
-                  <input
-                    id="prof-name"
-                    v-model="profileForm.name"
-                    type="text"
-                    class="form-input"
-                    :placeholder="$t('profile.fullNamePlaceholder')"
-                    autocomplete="name"
-                    required
-                  />
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label" for="prof-name">{{ $t('profile.fullName') }}</label>
+                  <div class="input-wrap">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input
+                      id="prof-name"
+                      v-model="profileForm.name"
+                      type="text"
+                      class="form-input"
+                      :placeholder="$t('profile.fullNamePlaceholder')"
+                      autocomplete="name"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="prof-email">{{ $t('profile.email') }}</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-envelope input-icon"></i>
-                  <input
-                    id="prof-email"
-                    v-model="profileForm.email"
-                    type="email"
-                    class="form-input"
-                    :placeholder="$t('profile.emailPlaceholder')"
-                    autocomplete="email"
-                    required
-                  />
+                <div class="form-field">
+                  <label class="form-label" for="prof-email">{{ $t('profile.email') }}</label>
+                  <div class="input-wrap">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <input
+                      id="prof-email"
+                      v-model="profileForm.email"
+                      type="email"
+                      class="form-input"
+                      :placeholder="$t('profile.emailPlaceholder')"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
               <div class="form-actions">
                 <button type="button" class="btn-secondary" @click="resetProfileForm">
+                  <i class="fa-solid fa-rotate-left"></i>
                   {{ $t('common.cancel') }}
                 </button>
                 <button type="submit" class="btn-primary" :disabled="profileLoading">
@@ -120,11 +135,110 @@
             </form>
           </div>
 
-          <!-- Security Tab -->
+          <!-- ── Favorites Tab ─────────────────────────────────── -->
+          <div v-else-if="activeTab === 'favorites'" key="favorites" class="profile-card">
+            <div class="profile-card-header">
+              <div class="card-header-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.myFavorites') }}</h2>
+                <p>{{ $t('profile.myFavoritesDesc') }}</p>
+              </div>
+            </div>
+
+            <!-- Loading state -->
+            <div v-if="favStore.loading" class="fav-loading">
+              <div class="fav-spinner">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </div>
+              <p>{{ $t('profile.loadingFavorites') }}</p>
+            </div>
+
+            <!-- Empty state -->
+            <div v-else-if="!favStore.hasFavorites" class="fav-empty">
+              <div class="fav-empty-icon">
+                <i class="fa-regular fa-heart"></i>
+              </div>
+              <h3>{{ $t('profile.noFavorites') }}</h3>
+              <p>{{ $t('profile.noFavoritesDesc') }}</p>
+              <router-link :to="{ name: 'inventory' }" class="btn-primary">
+                <i class="fa-solid fa-car"></i>
+                {{ $t('profile.browseCars') }}
+              </router-link>
+            </div>
+
+            <!-- Favorites grid -->
+            <div v-else class="fav-grid">
+              <article
+                v-for="car in favStore.favoriteCars"
+                :key="car.id"
+                class="fav-car-card"
+              >
+                <div class="fav-car-image" @click="goToCar(car.id)">
+                  <img
+                    :src="car.image_url || '/assets/img/car-placeholder.jpg'"
+                    :alt="`${car.make} ${car.model}`"
+                    loading="lazy"
+                  />
+                  <div v-if="car.status !== 'available'" class="fav-status-overlay">
+                    <span class="fav-status-badge" :class="`badge-${car.status}`">
+                      {{ $t(`car.status.${car.status}`) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="fav-car-body">
+                  <div class="fav-car-info">
+                    <h3 class="fav-car-name" @click="goToCar(car.id)">
+                      {{ car.make }} {{ car.model }}
+                    </h3>
+                    <p class="fav-car-year">{{ car.year }}</p>
+                    <p class="fav-car-price">{{ formatPrice(car.price) }}</p>
+                    <div class="fav-car-specs">
+                      <span v-if="car.mileage" class="fav-spec">
+                        <i class="fa-solid fa-road"></i> {{ formatMileage(car.mileage) }}
+                      </span>
+                      <span v-if="car.fuel_type" class="fav-spec">
+                        <i class="fa-solid fa-gas-pump"></i> {{ $t(`car.fuel.${car.fuel_type}`) }}
+                      </span>
+                      <span v-if="car.transmission" class="fav-spec">
+                        <i class="fa-solid fa-gears"></i> {{ $t(`car.trans.${car.transmission}`) }}
+                      </span>
+                      <span v-if="car.power_hp" class="fav-spec">
+                        <i class="fa-solid fa-bolt"></i> {{ car.power_hp }} {{ $t('common.hp') }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="fav-car-actions">
+                    <button class="btn-primary fav-view-btn" @click="goToCar(car.id)">
+                      <i class="fa-solid fa-circle-info"></i>
+                      {{ $t('car.viewDetails') }}
+                    </button>
+                    <button
+                      class="btn-remove-fav"
+                      :disabled="favStore.isToggling(car.id)"
+                      :aria-label="$t('car.removeFromFavorites')"
+                      @click="favStore.toggleFavorite(car.id)"
+                    >
+                      <i :class="favStore.isToggling(car.id) ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-heart-crack'"></i>
+                      {{ $t('profile.removeFavorite') }}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- ── Security Tab ──────────────────────────────────── -->
           <div v-else-if="activeTab === 'security'" key="security" class="profile-card">
             <div class="profile-card-header">
-              <h2><i class="fa-solid fa-shield-halved"></i> {{ $t('profile.security') }}</h2>
-              <p>{{ $t('profile.securityDesc') }}</p>
+              <div class="card-header-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.security') }}</h2>
+                <p>{{ $t('profile.securityDesc') }}</p>
+              </div>
             </div>
 
             <Transition name="banner-fade">
@@ -152,7 +266,7 @@
                     autocomplete="current-password"
                     required
                   />
-                  <button type="button" class="pw-toggle" @click="showCurrentPw = !showCurrentPw" :aria-label="showCurrentPw ? 'Hide password' : 'Show password'">
+                  <button type="button" class="pw-toggle" @click="showCurrentPw = !showCurrentPw" :aria-label="showCurrentPw ? 'Hide' : 'Show'">
                     <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
                   </button>
                 </div>
@@ -170,9 +284,8 @@
                     :placeholder="$t('profile.newPasswordPlaceholder')"
                     autocomplete="new-password"
                     required
-                    @input="onNewPwInput"
                   />
-                  <button type="button" class="pw-toggle" @click="showNewPw = !showNewPw" :aria-label="showNewPw ? 'Hide password' : 'Show password'">
+                  <button type="button" class="pw-toggle" @click="showNewPw = !showNewPw" :aria-label="showNewPw ? 'Hide' : 'Show'">
                     <i :class="showNewPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
                   </button>
                 </div>
@@ -183,11 +296,19 @@
                   </div>
                   <span class="strength-label" :class="strengthClass">{{ $t(strengthLabelKey) }}</span>
                 </div>
-                <!-- Requirements -->
                 <ul v-if="passwordForm.newPw" class="pw-requirements">
-                  <li :class="{ met: pwReqs.length }"><i :class="pwReqs.length ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i> {{ $t('profile.req8Chars') }}</li>
-                  <li :class="{ met: pwReqs.upper }"><i :class="pwReqs.upper ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i> {{ $t('profile.reqUppercase') }}</li>
-                  <li :class="{ met: pwReqs.number }"><i :class="pwReqs.number ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i> {{ $t('profile.reqNumber') }}</li>
+                  <li :class="{ met: pwReqs.length }">
+                    <i :class="pwReqs.length ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                    {{ $t('profile.req8Chars') }}
+                  </li>
+                  <li :class="{ met: pwReqs.upper }">
+                    <i :class="pwReqs.upper ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                    {{ $t('profile.reqUppercase') }}
+                  </li>
+                  <li :class="{ met: pwReqs.number }">
+                    <i :class="pwReqs.number ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                    {{ $t('profile.reqNumber') }}
+                  </li>
                 </ul>
               </div>
 
@@ -204,17 +325,19 @@
                     autocomplete="new-password"
                     required
                   />
-                  <button type="button" class="pw-toggle" @click="showConfirmPw = !showConfirmPw" :aria-label="showConfirmPw ? 'Hide password' : 'Show password'">
+                  <button type="button" class="pw-toggle" @click="showConfirmPw = !showConfirmPw" :aria-label="showConfirmPw ? 'Hide' : 'Show'">
                     <i :class="showConfirmPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
                   </button>
                 </div>
                 <p v-if="passwordForm.confirm && passwordForm.newPw !== passwordForm.confirm" class="field-error">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
                   {{ $t('profile.passwordMismatch') }}
                 </p>
               </div>
 
               <div class="form-actions">
                 <button type="button" class="btn-secondary" @click="resetPasswordForm">
+                  <i class="fa-solid fa-rotate-left"></i>
                   {{ $t('common.cancel') }}
                 </button>
                 <button type="submit" class="btn-primary" :disabled="passwordLoading || !canSavePassword">
@@ -226,17 +349,22 @@
             </form>
           </div>
 
-          <!-- Danger Zone Tab -->
+          <!-- ── Danger Zone Tab ───────────────────────────────── -->
           <div v-else-if="activeTab === 'danger'" key="danger" class="profile-card">
             <div class="profile-card-header">
-              <h2><i class="fa-solid fa-triangle-exclamation"></i> {{ $t('profile.dangerZone') }}</h2>
-              <p>{{ $t('profile.dangerZoneDesc') }}</p>
+              <div class="card-header-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.dangerZone') }}</h2>
+                <p>{{ $t('profile.dangerZoneDesc') }}</p>
+              </div>
             </div>
 
             <div class="danger-zone-section">
               <div class="danger-item">
                 <div class="danger-item-info">
-                  <h3>{{ $t('profile.signOut') }}</h3>
+                  <h3><i class="fa-solid fa-right-from-bracket"></i> {{ $t('profile.signOut') }}</h3>
                   <p>{{ $t('profile.signOutDesc') }}</p>
                 </div>
                 <button class="btn-danger" @click="handleLogout">
@@ -246,31 +374,46 @@
               </div>
             </div>
           </div>
+
         </Transition>
       </main>
     </div>
+
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.js'
+import { useFavoritesStore } from '@/stores/favorites.js'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import AppFooter from '@/components/layout/AppFooter.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
+const favStore = useFavoritesStore()
 
-// ── Tabs ─────────────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────────
 const tabs = [
-  { id: 'edit',     icon: 'fa-solid fa-user-pen',          label: 'profile.editProfile' },
-  { id: 'security', icon: 'fa-solid fa-shield-halved',      label: 'profile.security' },
-  { id: 'danger',   icon: 'fa-solid fa-triangle-exclamation', label: 'profile.dangerZone' },
+  { id: 'edit',      icon: 'fa-solid fa-user-pen',             label: 'profile.editProfile' },
+  { id: 'favorites', icon: 'fa-solid fa-heart',                 label: 'profile.myFavorites' },
+  { id: 'security',  icon: 'fa-solid fa-shield-halved',         label: 'profile.security' },
+  { id: 'danger',    icon: 'fa-solid fa-triangle-exclamation',  label: 'profile.dangerZone' },
 ]
 const activeTab = ref('edit')
 
-// ── Avatar ────────────────────────────────────────────────────────────
+// Load favorites when switching to that tab
+watch(activeTab, (tab) => {
+  if (tab === 'favorites') {
+    favStore.fetchFavoriteCars()
+  }
+})
+
+// ── Avatar ─────────────────────────────────────────────────────────────
 const initials = computed(() => {
   const name = authStore.user?.name || ''
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
@@ -288,12 +431,23 @@ const avatarGradient = computed(() => {
   return avatarGradients[id % avatarGradients.length]
 })
 
-// ── Member Since ──────────────────────────────────────────────────────
+// ── Member Since ───────────────────────────────────────────────────────
 const memberSince = computed(() => {
-  return new Date().getFullYear()
+  const u = authStore.user
+  const date = u?.created_at ? new Date(u.created_at) : new Date()
+  return new Intl.DateTimeFormat(locale.value, {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  }).format(date)
 })
 
-// ── Edit Profile ──────────────────────────────────────────────────────
+// ── Navigation helpers ─────────────────────────────────────────────────
+function goToCar(id) {
+  router.push({ name: 'car-detail', params: { id } })
+}
+
+// ── Edit Profile ───────────────────────────────────────────────────────
 const profileForm = ref({ name: '', email: '' })
 const profileLoading = ref(false)
 const profileSuccess = ref(false)
@@ -301,7 +455,7 @@ const profileError = ref('')
 
 function resetProfileForm() {
   profileForm.value = {
-    name: authStore.user?.name || '',
+    name:  authStore.user?.name  || '',
     email: authStore.user?.email || '',
   }
   profileSuccess.value = false
@@ -313,7 +467,7 @@ async function saveProfile() {
   profileError.value = ''
   profileLoading.value = true
   const result = await authStore.updateProfile({
-    name: profileForm.value.name.trim(),
+    name:  profileForm.value.name.trim(),
     email: profileForm.value.email.trim(),
   })
   profileLoading.value = false
@@ -325,7 +479,7 @@ async function saveProfile() {
   }
 }
 
-// ── Password ──────────────────────────────────────────────────────────
+// ── Password ───────────────────────────────────────────────────────────
 const passwordForm = ref({ current: '', newPw: '', confirm: '' })
 const passwordLoading = ref(false)
 const passwordSuccess = ref(false)
@@ -336,7 +490,7 @@ const showConfirmPw = ref(false)
 
 const pwReqs = computed(() => ({
   length: passwordForm.value.newPw.length >= 8,
-  upper: /[A-Z]/.test(passwordForm.value.newPw),
+  upper:  /[A-Z]/.test(passwordForm.value.newPw),
   number: /\d/.test(passwordForm.value.newPw),
 }))
 
@@ -379,10 +533,6 @@ const canSavePassword = computed(() =>
   pwReqs.value.number
 )
 
-function onNewPwInput() {
-  // reactive — computed handles everything
-}
-
 function resetPasswordForm() {
   passwordForm.value = { current: '', newPw: '', confirm: '' }
   passwordSuccess.value = false
@@ -408,45 +558,64 @@ async function savePassword() {
   }
 }
 
-// ── Logout ────────────────────────────────────────────────────────────
+// ── Logout ─────────────────────────────────────────────────────────────
 async function handleLogout() {
   await authStore.logout()
   router.push({ name: 'home' })
 }
 
-// ── Init ──────────────────────────────────────────────────────────────
+// ── Format helpers ─────────────────────────────────────────────────────
+function formatPrice(price) {
+  if (!price) return '—'
+  return new Intl.NumberFormat(locale.value === 'pl' ? 'pl-PL' : 'en-EU', {
+    style:    'currency',
+    currency: locale.value === 'pl' ? 'PLN' : 'EUR',
+    maximumFractionDigits: 0
+  }).format(price)
+}
+
+function formatMileage(km) {
+  return new Intl.NumberFormat().format(km) + ' km'
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
 onMounted(async () => {
   await authStore.fetchMe()
   resetProfileForm()
+  // Pre-load favorite IDs if not already loaded
+  if (favStore.count === 0) {
+    await favStore.fetchFavoriteIds()
+  }
 })
 </script>
 
 <style scoped>
-/* ── Page Layout ───────────────────────────────────────────────────── */
+/* ── Page Layout ──────────────────────────────────────────────────── */
 .profile-page {
   min-height: 100vh;
   background: var(--bg-secondary);
-  padding-bottom: 4rem;
 }
 
-/* ── Hero ──────────────────────────────────────────────────────────── */
+/* ── Hero ─────────────────────────────────────────────────────────── */
 .profile-hero {
-  background: linear-gradient(135deg, #1a3a6e 0%, #1a56db 60%, #0ea5e9 100%);
-  padding: calc(var(--nav-height, 72px) + 5rem) 2rem 3rem;
+  background: linear-gradient(135deg, #0f2460 0%, #1a56db 55%, #0ea5e9 100%);
+  padding: calc(var(--nav-height, 72px) + 4rem) 2rem 3.5rem;
   position: relative;
   overflow: hidden;
 }
 
-.profile-hero::before {
-  content: '';
+.profile-hero-bg-pattern {
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   pointer-events: none;
 }
 
 .profile-hero-inner {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -454,38 +623,61 @@ onMounted(async () => {
   position: relative;
 }
 
+/* ── Avatar ───────────────────────────────────────────────────────── */
 .profile-avatar {
-  width: 96px;
-  height: 96px;
+  position: relative;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #fff;
-  border: 4px solid rgba(255,255,255,0.25);
   flex-shrink: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  letter-spacing: 0.05em;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
 
-.profile-hero-info {
-  flex: 1;
+.avatar-initials {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
 }
+
+.avatar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
+}
+
+/* ── Hero Info ────────────────────────────────────────────────────── */
+.profile-hero-info { flex: 1; min-width: 0; }
 
 .profile-name {
-  font-size: 1.9rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.3rem;
   line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .profile-email-hero {
-  color: rgba(255,255,255,0.75);
-  font-size: 0.95rem;
-  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.9rem;
+  margin: 0 0 0.9rem;
+}
+
+.profile-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .profile-role-badge {
@@ -494,63 +686,60 @@ onMounted(async () => {
   gap: 0.4rem;
   padding: 0.3rem 0.85rem;
   border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .badge-admin {
-  background: rgba(255,200,60,0.2);
+  background: rgba(255,200,60,0.18);
   color: #fbbf24;
   border: 1px solid rgba(251,191,36,0.35);
 }
 
 .badge-user {
-  background: rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.92);
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* ── Main Layout ───────────────────────────────────────────────────── */
+.profile-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.82rem;
+}
+
+.profile-stat i { font-size: 0.75rem; }
+
+/* ── Main Layout ──────────────────────────────────────────────────── */
 .profile-layout {
-  max-width: 900px;
-  margin: -2rem auto 0;
+  max-width: 960px;
+  margin: -2rem auto 4rem;
   padding: 0 1.5rem;
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 230px 1fr;
   gap: 1.5rem;
   align-items: start;
 }
 
-@media (max-width: 680px) {
-  .profile-layout {
-    grid-template-columns: 1fr;
-    margin-top: -1.5rem;
-  }
-  .profile-hero {
-    padding: calc(var(--nav-height, 72px) + 4.5rem) 1.25rem 2rem;
-  }
-  .profile-hero-inner {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-  .profile-name { font-size: 1.5rem; }
-}
-
-/* ── Sidebar ───────────────────────────────────────────────────────── */
+/* ── Sidebar ──────────────────────────────────────────────────────── */
 .profile-sidebar {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  position: sticky;
+  top: calc(var(--nav-height, 72px) + 1rem);
 }
 
 .profile-nav {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
 }
 
 .profile-nav-item {
@@ -567,12 +756,11 @@ onMounted(async () => {
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  position: relative;
 }
 
-.profile-nav-item:last-child {
-  border-bottom: none;
-}
+.profile-nav-item:last-child { border-bottom: none; }
 
 .profile-nav-item:hover {
   background: var(--bg-secondary);
@@ -580,127 +768,139 @@ onMounted(async () => {
 }
 
 .profile-nav-item.active {
-  background: rgba(26, 86, 219, 0.08);
+  background: rgba(26,86,219,0.07);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 650;
   border-left: 3px solid var(--accent);
 }
 
-.profile-nav-item i {
-  width: 18px;
+.nav-icon {
+  width: 20px;
   text-align: center;
   font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.nav-label { flex: 1; }
+
+.nav-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /* Account Info Card */
 .profile-info-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 1.1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+
+.info-card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
 }
 
 .info-card-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.6rem 0;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
   border-bottom: 1px solid var(--border-color);
 }
 
-.info-card-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.info-card-row:first-child {
-  padding-top: 0;
-}
+.info-card-row:last-child { border-bottom: none; padding-bottom: 0; }
+.info-card-row:first-of-type { padding-top: 0; }
 
 .info-card-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.72rem;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .info-card-value {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
+  text-align: right;
 }
 
 .status-active {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   color: #10b981;
 }
 
-/* Mobile: sidebar becomes horizontal */
-@media (max-width: 680px) {
-  .profile-nav {
-    display: flex;
-    border-radius: 12px;
-    overflow-x: auto;
-  }
-  .profile-nav-item {
-    flex-direction: column;
-    text-align: center;
-    padding: 0.75rem 1rem;
-    border-bottom: none;
-    border-right: 1px solid var(--border-color);
-    white-space: nowrap;
-    gap: 0.3rem;
-    font-size: 0.8rem;
-    min-width: 90px;
-  }
-  .profile-nav-item:last-child { border-right: none; }
-  .profile-nav-item.active {
-    border-left: none;
-    border-bottom: 3px solid var(--accent);
-  }
-  .profile-info-card { display: none; }
+.fav-count-val {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #ef4444;
 }
 
-/* ── Profile Card ──────────────────────────────────────────────────── */
+/* ── Profile Card ─────────────────────────────────────────────────── */
+.profile-main { min-width: 0; }
+
 .profile-card {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+  position: sticky;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
 }
 
 .profile-card-header {
-  padding: 1.75rem 2rem 1.25rem;
+  padding: 1.75rem 2rem 1.4rem;
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.card-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 .profile-card-header h2 {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 0.35rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.profile-card-header h2 i {
-  color: var(--accent);
-  font-size: 1rem;
+  margin: 0 0 0.25rem;
 }
 
 .profile-card-header p {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   margin: 0;
+  line-height: 1.4;
 }
 
-/* ── Form ──────────────────────────────────────────────────────────── */
+/* ── Form ─────────────────────────────────────────────────────────── */
 .profile-form {
   padding: 1.75rem 2rem;
   display: flex;
@@ -708,8 +908,10 @@ onMounted(async () => {
   gap: 1.25rem;
 }
 
-@media (max-width: 480px) {
-  .profile-card-header, .profile-form { padding-left: 1.25rem; padding-right: 1.25rem; }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .form-field {
@@ -719,9 +921,10 @@ onMounted(async () => {
 }
 
 .form-label {
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 600;
   color: var(--text-secondary);
+  letter-spacing: 0.01em;
 }
 
 .input-wrap {
@@ -734,7 +937,7 @@ onMounted(async () => {
   position: absolute;
   left: 0.875rem;
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   pointer-events: none;
   z-index: 1;
 }
@@ -753,7 +956,7 @@ onMounted(async () => {
 
 .form-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
 }
 
 .pw-toggle {
@@ -766,16 +969,16 @@ onMounted(async () => {
   padding: 0.25rem;
   font-size: 0.875rem;
   transition: color 0.15s;
+  z-index: 1;
 }
-
 .pw-toggle:hover { color: var(--text-primary); }
 
-/* ── Strength Meter ────────────────────────────────────────────────── */
+/* ── Strength Meter ───────────────────────────────────────────────── */
 .strength-meter {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
 }
 
 .strength-bar {
@@ -792,73 +995,67 @@ onMounted(async () => {
   transition: width 0.3s ease, background 0.3s ease;
 }
 
-.strength-weak   .strength-fill, .strength-fill.strength-weak   { background: #ef4444; }
-.strength-fair   .strength-fill, .strength-fill.strength-fair   { background: #f97316; }
-.strength-good   .strength-fill, .strength-fill.strength-good   { background: #eab308; }
-.strength-strong .strength-fill, .strength-fill.strength-strong { background: #10b981; }
+.strength-fill.strength-weak   { background: #ef4444; }
+.strength-fill.strength-fair   { background: #f97316; }
+.strength-fill.strength-good   { background: #eab308; }
+.strength-fill.strength-strong { background: #10b981; }
 
 .strength-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  min-width: 48px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 46px;
   text-align: right;
 }
-
 .strength-label.strength-weak   { color: #ef4444; }
 .strength-label.strength-fair   { color: #f97316; }
 .strength-label.strength-good   { color: #eab308; }
 .strength-label.strength-strong { color: #10b981; }
 
-/* ── Password Requirements ─────────────────────────────────────────── */
 .pw-requirements {
   list-style: none;
   padding: 0;
-  margin: 0.25rem 0 0;
+  margin: 0.3rem 0 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .pw-requirements li {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 0.35rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   transition: color 0.2s;
 }
 
-.pw-requirements li.met {
-  color: #10b981;
-}
+.pw-requirements li.met { color: #10b981; }
 
 .pw-requirements li i {
-  width: 14px;
+  width: 12px;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.8rem;
   color: #ef4444;
   margin: 0.15rem 0 0;
 }
 
-/* ── Form Actions ──────────────────────────────────────────────────── */
+/* ── Form Actions ─────────────────────────────────────────────────── */
 .form-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border-color);
 }
 
-@media (max-width: 480px) {
-  .form-actions { flex-direction: column; }
-  .form-actions .btn-secondary,
-  .form-actions .btn-primary { width: 100%; justify-content: center; }
-}
-
+/* ── Buttons ──────────────────────────────────────────────────────── */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -867,16 +1064,18 @@ onMounted(async () => {
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 9px;
+  border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s, opacity 0.15s;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.12s, opacity 0.15s, box-shadow 0.15s;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover, #1648c0);
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(26,86,219,0.3);
 }
 
 .btn-primary:disabled {
@@ -893,11 +1092,11 @@ onMounted(async () => {
   background: var(--bg-secondary);
   color: var(--text-secondary);
   border: 1.5px solid var(--border-color);
-  border-radius: 9px;
+  border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .btn-secondary:hover {
@@ -905,7 +1104,7 @@ onMounted(async () => {
   color: var(--text-primary);
 }
 
-/* ── Alert Banners ─────────────────────────────────────────────────── */
+/* ── Alert Banners ────────────────────────────────────────────────── */
 .alert-banner {
   display: flex;
   align-items: center;
@@ -916,18 +1115,221 @@ onMounted(async () => {
 }
 
 .alert-success {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16,185,129,0.08);
   color: #059669;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  border-bottom: 1px solid rgba(16,185,129,0.18);
 }
 
 .alert-error {
-  background: rgba(239, 68, 68, 0.09);
+  background: rgba(239,68,68,0.07);
   color: #dc2626;
-  border-bottom: 1px solid rgba(239, 68, 68, 0.18);
+  border-bottom: 1px solid rgba(239,68,68,0.15);
 }
 
-/* ── Danger Zone ───────────────────────────────────────────────────── */
+/* ── Favorites ────────────────────────────────────────────────────── */
+.fav-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.fav-spinner {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.fav-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  gap: 0.75rem;
+}
+
+.fav-empty-icon {
+  width: 72px;
+  height: 72px;
+  background: rgba(239,68,68,0.07);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 0.5rem;
+}
+
+.fav-empty h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.fav-empty p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem;
+  max-width: 300px;
+}
+
+/* ── Favorites Grid ───────────────────────────────────────────────── */
+.fav-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fav-car-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s;
+}
+
+.fav-car-card:last-child { border-bottom: none; }
+
+.fav-car-card:hover { background: var(--bg-secondary); }
+
+.fav-car-image {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 16/11;
+}
+
+.fav-car-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.fav-car-card:hover .fav-car-image img { transform: scale(1.04); }
+
+.fav-status-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-status-badge {
+  padding: 0.3rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+}
+
+.badge-sold { background: rgba(239,68,68,0.85); }
+.badge-reserved { background: rgba(234,179,8,0.85); }
+
+.fav-car-body {
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.fav-car-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.15rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-car-name:hover { color: var(--accent); }
+
+.fav-car-year {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0 0 0.15rem;
+}
+
+.fav-car-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.fav-car-specs {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.fav-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+}
+
+.fav-spec i { font-size: 0.7rem; color: var(--accent); }
+
+.fav-car-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fav-view-btn {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.82rem;
+}
+
+.btn-remove-fav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  border: 1.5px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+}
+
+.btn-remove-fav:hover:not(:disabled) {
+  background: rgba(239,68,68,0.14);
+  border-color: rgba(239,68,68,0.4);
+  transform: translateY(-1px);
+}
+
+.btn-remove-fav:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Danger Zone ──────────────────────────────────────────────────── */
 .danger-zone-section {
   padding: 1.75rem 2rem;
 }
@@ -937,26 +1339,26 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 1.25rem;
-  border: 1.5px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
-  background: rgba(239, 68, 68, 0.04);
-}
-
-@media (max-width: 480px) {
-  .danger-item { flex-direction: column; align-items: flex-start; }
-  .danger-zone-section { padding-left: 1.25rem; padding-right: 1.25rem; }
+  padding: 1.25rem 1.5rem;
+  border: 1.5px solid rgba(239,68,68,0.2);
+  border-radius: 14px;
+  background: rgba(239,68,68,0.03);
 }
 
 .danger-item-info h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 0.3rem;
 }
 
+.danger-item-info h3 i { color: #ef4444; }
+
 .danger-item-info p {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
   margin: 0;
 }
@@ -969,21 +1371,22 @@ onMounted(async () => {
   background: #ef4444;
   color: #fff;
   border: none;
-  border-radius: 9px;
+  border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
   flex-shrink: 0;
 }
 
 .btn-danger:hover {
   background: #dc2626;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(239,68,68,0.3);
 }
 
-/* ── Transitions ───────────────────────────────────────────────────── */
+/* ── Transitions ──────────────────────────────────────────────────── */
 .tab-fade-enter-active,
 .tab-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -991,12 +1394,12 @@ onMounted(async () => {
 
 .tab-fade-enter-from {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
 }
 
 .tab-fade-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(-6px);
 }
 
 .banner-fade-enter-active,
@@ -1010,5 +1413,101 @@ onMounted(async () => {
 .banner-fade-leave-to {
   opacity: 0;
   max-height: 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+    margin-top: -1.5rem;
+    padding: 0 1rem;
+  }
+
+  .profile-sidebar {
+    position: static;
+  }
+
+  .profile-hero {
+    padding: calc(var(--nav-height, 72px) + 3.5rem) 1.25rem 2.25rem;
+  }
+
+  .profile-hero-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+  }
+
+  .profile-hero-meta {
+    justify-content: center;
+  }
+
+  .profile-name { font-size: 1.6rem; }
+
+  .profile-nav {
+    display: flex;
+    border-radius: 14px;
+    overflow-x: auto;
+    position: sticky;
+    scrollbar-width: none;
+  }
+  .profile-nav::-webkit-scrollbar { display: none; }
+
+  .profile-nav-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 0.7rem 0.9rem;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+    white-space: nowrap;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    min-width: 80px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .profile-nav-item:last-child { border-right: none; }
+
+  .profile-nav-item.active {
+    border-left: none;
+    border-bottom: 3px solid var(--accent);
+    background: rgba(26,86,219,0.07);
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+  }
+
+  .profile-info-card { display: none; }
+
+  .form-row { grid-template-columns: 1fr; }
+
+  .profile-card-header { padding: 1.25rem 1.25rem 1rem; }
+  .profile-form { padding: 1.25rem; }
+  .danger-zone-section { padding: 1.25rem; }
+
+  .fav-car-card {
+    grid-template-columns: 130px 1fr;
+  }
+
+  .fav-car-body { padding: 0.875rem 1rem; }
+
+  .pw-requirements { flex-direction: column; gap: 0.3rem; }
+}
+
+@media (max-width: 480px) {
+  .fav-car-card { grid-template-columns: 1fr; }
+  .fav-car-image { aspect-ratio: 16/9; }
+  .fav-car-actions { flex-direction: column; }
+  .fav-view-btn, .btn-remove-fav { width: 100%; justify-content: center; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn-secondary,
+  .form-actions .btn-primary { width: 100%; justify-content: center; }
+  .danger-item { flex-direction: column; align-items: flex-start; }
 }
 </style>

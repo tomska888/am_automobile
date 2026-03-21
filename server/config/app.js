@@ -68,6 +68,7 @@ const authLimiter = rateLimit({
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('../routes/auth'))
 app.use('/api/cars', require('../routes/cars'))
+app.use('/api/favorites', require('../routes/favorites'))
 app.use('/api/contact', require('../routes/contact'))
 app.use('/api/messages', require('../routes/messages'))
 app.use('/api/stats', require('../routes/stats'))

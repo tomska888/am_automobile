@@ -30,7 +30,7 @@ router.post(
   '/register',
   [
     body('name').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be 2–100 characters'),
-    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('email').isEmail({ allow_utf8_local_part: false }).toLowerCase().withMessage('Valid email required'),
     body('password')
       .isLength({ min: 8 })
       .withMessage('Password must be at least 8 characters')
@@ -79,7 +79,7 @@ router.post(
 router.post(
   '/login',
   [
-    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('email').isEmail({ allow_utf8_local_part: false }).toLowerCase().withMessage('Valid email required'),
     body('password').notEmpty().withMessage('Password required')
   ],
   async (req, res) => {
@@ -127,6 +127,16 @@ router.post(
   }
 )
 
+// ─── POST /api/auth/logout ────────────────────────────────────────────────────
+// JWT is stateless — actual invalidation happens client-side by discarding the
+// token. This endpoint exists as a clean hook for future server-side token
+// blacklisting (e.g. Redis blocklist) without requiring client changes.
+
+router.post('/logout', auth, (req, res) => {
+  // TODO: add token to Redis blacklist here when implementing server-side revocation
+  res.json({ success: true, message: 'Logged out successfully' })
+})
+
 // ─── GET /api/auth/me ─────────────────────────────────────────────────────────
 
 router.get('/me', auth, async (req, res) => {
@@ -154,7 +164,7 @@ router.put(
   auth,
   [
     body('name').optional().trim().isLength({ min: 2, max: 100 }),
-    body('email').optional().isEmail().normalizeEmail()
+    body('email').optional().isEmail({ allow_utf8_local_part: false }).toLowerCase()
   ],
   async (req, res) => {
     if (!handleValidation(req, res)) return

@@ -3,6 +3,7 @@
     class="am-navbar"
     :class="[
       { scrolled: navScrolled },
+      { 'menu-open': mobileMenuOpen },
       transparent ? 'am-navbar-transparent' : 'am-navbar-solid'
     ]"
     role="navigation"
@@ -700,27 +701,37 @@ onBeforeUnmount(() => {
 
 /* ── MOBILE MENU ──────────────────────────────────────────── */
 .am-mobile-menu {
-  position: absolute;
-  top: 72px;
-  left: 0;
-  right: 0;
   pointer-events: all;
   background: #0A4B8C;
   border-top: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  padding: 1rem 1.5rem;
+  padding: 1rem 1.5rem 1.5rem;
   transition: border-radius 0.35s cubic-bezier(0.4,0,0.2,1);
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-/* In pill mode — header physically moves, so absolute child follows.
-   Just round the bottom corners to complete the pill shape. */
+/* In pill mode — the menu is absolute inside the header.
+   The pill's left/right inset (24px each) shrinks the header element,
+   so left:0/right:0 on the absolute child already tracks the pill edges. */
 .am-navbar.scrolled .am-mobile-menu {
+  left: 0;
+  right: 0;
   border-radius: 0 0 28px 28px;
   border-top: 1px solid rgba(255,255,255,0.08);
 }
+
+/* When menu is open in pill mode — flatten the navbar's bottom corners
+   so the pill bar connects seamlessly with the dropdown below it.
+   Must match specificity of .am-navbar-solid.scrolled and
+   .am-navbar-transparent.scrolled (both 2-class) so we use 3 classes. */
+.am-navbar-solid.scrolled.menu-open,
+.am-navbar-transparent.scrolled.menu-open {
+  border-radius: 28px 28px 0 0;
+}
+
+/* Non-scrolled flat bar — menu already inherits square corners */
 
 .mobile-nav-links {
   display: flex;

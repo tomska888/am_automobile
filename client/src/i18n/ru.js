@@ -117,6 +117,8 @@ export default {
     car: {
         viewDetails: 'Подробнее',
         contactAbout: 'Узнать об этом автомобиле',
+        addToFavorites: 'Добавить в избранное',
+        removeFromFavorites: 'Убрать из избранного',
         make: 'Марка',
         model: 'Модель',
         year: 'Год',
@@ -381,7 +383,7 @@ export default {
         fullName: 'Полное имя',
         fullNamePlaceholder: 'Ваше полное имя',
         email: 'Email адрес',
-        emailPlaceholder: 'ваш@email.com',
+        emailPlaceholder: "ваш{'@'}email.com",
         saveChanges: 'Сохранить изменения',
         currentPassword: 'Текущий пароль',
         currentPasswordPlaceholder: 'Введите текущий пароль',
@@ -425,6 +427,17 @@ export default {
         strengthStrong: 'Сильный',
         req8Chars: 'Минимум 8 символов',
         reqUppercase: 'Минимум одна заглавная буква',
-        reqNumber: 'Минимум одна цифра'
+        reqNumber: 'Минимум одна цифра',
+        navigation: 'Навигация профиля',
+        accountInfo: 'Информация об аккаунте',
+        savedCars: 'Сохранённые авто',
+        myFavorites: 'Моё избранное',
+        myFavoritesDesc: 'Автомобили, которые вы сохранили — просматривайте и управляйте вашим списком желаний.',
+        favoritesCount: 'сохранено',
+        loadingFavorites: 'Загрузка избранного...',
+        noFavorites: 'Нет сохранённых авто',
+        noFavoritesDesc: 'Просматривайте наш каталог и нажимайте на сердечко на любом автомобиле, чтобы сохранить его.',
+        browseCars: 'Смотреть автомобили',
+        removeFavorite: 'Удалить'
     }
 }

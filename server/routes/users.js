@@ -104,7 +104,7 @@ router.put(
   [
     param('id').isInt({ min: 1 }),
     body('name').optional().trim().isLength({ min: 2, max: 100 }),
-    body('email').optional().isEmail().normalizeEmail(),
+    body('email').optional().isEmail({ allow_utf8_local_part: false }).toLowerCase(),
     body('role').optional().isIn(['user', 'admin']).withMessage('Role must be user or admin')
   ],
   async (req, res) => {

@@ -17,6 +17,23 @@
           {{ $t(`car.status.${car.status}`) }}
         </span>
       </div>
+      <!-- Favorite button -->
+      <button
+        v-if="authStore.isAuthenticated"
+        class="fav-btn"
+        :class="{ 'fav-btn--active': favStore.isFavorite(car.id), 'fav-btn--loading': favStore.isToggling(car.id) }"
+        :aria-label="favStore.isFavorite(car.id) ? $t('car.removeFromFavorites') : $t('car.addToFavorites')"
+        :title="favStore.isFavorite(car.id) ? $t('car.removeFromFavorites') : $t('car.addToFavorites')"
+        @click.stop="handleFavToggle"
+      >
+        <i
+          :class="favStore.isToggling(car.id)
+            ? 'fa-solid fa-spinner fa-spin'
+            : favStore.isFavorite(car.id)
+              ? 'fa-solid fa-heart'
+              : 'fa-regular fa-heart'"
+        ></i>
+      </button>
     </div>
 
     <!-- Body -->
@@ -59,8 +76,12 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth.js'
+import { useFavoritesStore } from '@/stores/favorites.js'
 
 const { locale } = useI18n()
+const authStore = useAuthStore()
+const favStore = useFavoritesStore()
 
 const props = defineProps({
   car: {
@@ -79,6 +100,10 @@ const badgeClass = computed(() => {
   }
   return map[props.car.badge] || 'badge-featured'
 })
+
+function handleFavToggle() {
+  favStore.toggleFavorite(props.car.id)
+}
 
 function formatPrice(price) {
   if (!price) return '—'
@@ -110,5 +135,48 @@ function formatMileage(km) {
   font-size: 1rem;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
+}
+
+/* ── Favorite Button ─────────────────────────────────────── */
+.fav-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  color: #94a3b8;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.fav-btn:hover {
+  background: #fff;
+  color: #ef4444;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fav-btn--active {
+  background: #fff;
+  color: #ef4444;
+}
+
+.fav-btn--active:hover {
+  color: #dc2626;
+}
+
+.fav-btn--loading {
+  pointer-events: none;
+  opacity: 0.7;
 }
 </style>
