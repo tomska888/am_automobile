@@ -445,35 +445,35 @@ const defaultForm = () => ({
 })
 
 const form = ref(defaultForm())
-const galleryText = ref('')
+const galleryText  = ref('')
 const featuresText = ref('')
 
 const isEditing = computed(() => !!props.car?.id)
 
-// Populate form when editing
-watch(
-  () => props.car,
-  (car) => {
-    if (car) {
-      form.value = { ...defaultForm(), ...car }
-      galleryText.value = Array.isArray(car.gallery) ? car.gallery.join('\n') : ''
-      featuresText.value = Array.isArray(car.features) ? car.features.join('\n') : ''
-    } else {
-      form.value = defaultForm()
-      galleryText.value = ''
-      featuresText.value = ''
-    }
-    errors.value = {}
-    imageError.value = false
-  },
-  { immediate: true }
-)
-
-// Reset on close
+// Populate / reset form whenever the modal opens or the car prop changes.
+// NOTE: NO deep:true — deep watching would re-fire (and reset the textareas)
+// every time the store updates the car object while the form is open.
 watch(
   () => props.modelValue,
-  (val) => {
-    if (!val) {
+  (isOpen) => {
+    if (isOpen) {
+      const car = props.car
+      if (car) {
+        form.value = {
+          ...defaultForm(),
+          ...car,
+          gallery:  Array.isArray(car.gallery)  ? [...car.gallery]  : [],
+          features: Array.isArray(car.features) ? [...car.features] : [],
+        }
+      } else {
+        form.value = defaultForm()
+      }
+      // Sync textareas from the arrays — only when modal first opens
+      galleryText.value  = form.value.gallery.join('\n')
+      featuresText.value = form.value.features.join('\n')
+      errors.value       = {}
+      imageError.value   = false
+    } else {
       errors.value = {}
     }
   }
@@ -495,24 +495,49 @@ function validate() {
 async function handleSubmit() {
   if (!validate()) return
 
-  // Parse gallery and features from textarea
-  form.value.gallery = galleryText.value
+  // Parse textarea content into arrays at submit time
+  const gallery = galleryText.value
     .split('\n')
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean)
     .slice(0, 10)
 
-  form.value.features = featuresText.value
+  const features = featuresText.value
     .split('\n')
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean)
+
+  // Helper: convert empty string to null for optional fields
+  const toNum = (v) => (v === '' || v === null || v === undefined) ? null : Number(v)
+  const toStr = (v) => (v === '' || v === null || v === undefined) ? null : String(v).trim()
+
+  const payload = {
+    make:         form.value.make?.trim(),
+    model:        form.value.model?.trim(),
+    year:         Number(form.value.year),
+    price:        Number(form.value.price),
+    mileage:      toNum(form.value.mileage),
+    fuel_type:    form.value.fuel_type,
+    transmission: toStr(form.value.transmission),
+    body_type:    toStr(form.value.body_type),
+    engine_size:  toNum(form.value.engine_size),
+    power_hp:     toNum(form.value.power_hp),
+    color:        toStr(form.value.color),
+    vin:          toStr(form.value.vin),
+    status:       form.value.status,
+    featured:     !!form.value.featured,
+    image_url:    toStr(form.value.image_url),
+    description:  toStr(form.value.description),
+    gallery,
+    features,
+  }
 
   submitting.value = true
   try {
     if (isEditing.value) {
-      await carsStore.updateCar(props.car.id, form.value)
+      await carsStore.updateCar(props.car.id, payload)
     } else {
-      await carsStore.createCar(form.value)
+      await carsStore.createCar(payload)
     }
     emit('saved')
     emit('update:modelValue', false)

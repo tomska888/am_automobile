@@ -8,22 +8,31 @@
       :data-theme="opt.value"
       role="radio"
       :aria-checked="uiStore.theme === opt.value"
-      @click="uiStore.setTheme(opt.value)"
+      @click="setTheme(opt.value)"
       :title="$t(`theme.${opt.value}`)"
     >
-      <span aria-hidden="true">{{ opt.icon }}</span>
+      <i :class="opt.icon" aria-hidden="true"></i>
     </button>
   </div>
 </template>
 
 <script setup>
 import { useUiStore } from '@/stores/ui.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 const uiStore = useUiStore()
+const authStore = useAuthStore()
 
 const options = [
-  { value: 'light',  icon: '☀️' },
-  { value: 'system', icon: '💻' },
-  { value: 'dark',   icon: '🌙' }
+  { value: 'light',  icon: 'fa-solid fa-sun' },
+  { value: 'system', icon: 'fa-solid fa-display' },
+  { value: 'dark',   icon: 'fa-solid fa-moon' }
 ]
+
+function setTheme(value) {
+  uiStore.setTheme(value)
+  if (authStore.isAuthenticated) {
+    authStore.savePreferences({ theme: value })
+  }
+}
 </script>

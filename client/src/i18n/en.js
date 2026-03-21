@@ -438,6 +438,14 @@ export default {
         noFavorites: 'No saved cars yet',
         noFavoritesDesc: 'Browse our inventory and tap the heart on any car to save it here.',
         browseCars: 'Browse Cars',
-        removeFavorite: 'Remove'
+        removeFavorite: 'Remove',
+        settings: 'Settings',
+        settingsDesc: 'Personalise your experience — choose your preferred theme and language.',
+        settingsTheme: 'Theme',
+        settingsThemeDesc: 'Choose the visual style that\'s easiest on your eyes.',
+        settingsLanguage: 'Language',
+        settingsLanguageDesc: 'Select the language you want the site displayed in.',
+        settingsSaved: 'Preferences saved successfully.',
+        settingsSaveError: 'Could not save preferences. Please try again.'
     }
 }

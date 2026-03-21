@@ -89,9 +89,11 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUiStore } from '@/stores/ui.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 const { locale } = useI18n()
 const uiStore = useUiStore()
+const authStore = useAuthStore()
 
 const newsletterEmail = ref('')
 const currentYear = computed(() => new Date().getFullYear())
@@ -105,8 +107,10 @@ const languages = [
 
 function switchLang(code) {
   locale.value = code
-  uiStore.setLocale?.(code)
-  localStorage.setItem('am-lang', code)
+  uiStore.setLocale(code)
+  if (authStore.isAuthenticated) {
+    authStore.savePreferences({ locale: code })
+  }
 }
 
 function subscribeNewsletter() {

@@ -277,9 +277,11 @@ const currentLangFlag = computed(() => {
 
 function setLang(code) {
   locale.value = code
-  uiStore.setLocale?.(code)
-  localStorage.setItem('am-lang', code)
+  uiStore.setLocale(code)
   langMenuOpen.value = false
+  if (authStore.isAuthenticated) {
+    authStore.savePreferences({ locale: code })
+  }
 }
 
 function closeMobile() {

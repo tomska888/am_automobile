@@ -136,7 +136,7 @@ const filteredCars = computed(() => {
 })
 
 onMounted(async () => {
-  await carsStore.fetchCars()
+  await carsStore.fetchCars({ status: 'all', limit: 200 })
   loading.value = false
 })
 
@@ -145,9 +145,9 @@ function openModal(car = null) {
   showModal.value  = true
 }
 
-function onCarSaved() {
+async function onCarSaved() {
   showModal.value = false
-  carsStore.fetchCars()
+  await carsStore.fetchCars({ status: 'all', limit: 200 })
   uiStore.toast.success('Car saved successfully!')
 }
 
@@ -160,6 +160,7 @@ async function handleDelete() {
   deleting.value = true
   try {
     await carsStore.deleteCar(deleteTarget.value.id)
+    await carsStore.fetchCars({ status: 'all', limit: 200 })
     uiStore.toast.success('Car deleted.')
     deleteTarget.value = null
   } catch {

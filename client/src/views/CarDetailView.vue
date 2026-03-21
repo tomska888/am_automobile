@@ -1,6 +1,6 @@
 <template>
   <div class="car-detail-page">
-    <AppHeader />
+    <AppHeader :heroBelow="pageScrolled" />
 
     <LoadingSpinner v-if="loading" />
 
@@ -259,7 +259,7 @@
                 </div>
               </div>
 
-              <!-- EQUIPMENT (collapsible, two-column) -->
+              <!-- FEATURES (collapsible, two-column) -->
               <div class="cd-collapse-card" v-if="allFeatures.length">
                 <button
                   class="cd-collapse-header"
@@ -267,26 +267,33 @@
                   :aria-expanded="featuresOpen"
                   aria-controls="features-panel"
                 >
-                  <span class="cd-collapse-title">Equipment</span>
+                  <span class="cd-collapse-title">Features</span>
                   <i class="fa-solid fa-chevron-down cd-collapse-chevron" :class="{ 'cd-collapse-chevron--open': featuresOpen }"></i>
                 </button>
                 <div id="features-panel" class="cd-collapse-body" :class="{ 'cd-collapse-body--open': featuresOpen }">
                   <div class="cd-collapse-inner">
-                    <div class="cd-features-two-col">
-                      <ul class="cd-features-col">
-                        <li v-for="feat in leftFeatures" :key="feat" class="cd-feature-row">
-                          <span class="cd-feature-name">{{ feat }}</span>
-                          <i class="fa-solid fa-check cd-feature-check"></i>
-                        </li>
-                      </ul>
-                      <div class="cd-features-divider" aria-hidden="true"></div>
-                      <ul class="cd-features-col">
-                        <li v-for="feat in rightFeatures" :key="feat" class="cd-feature-row">
-                          <span class="cd-feature-name">{{ feat }}</span>
-                          <i class="fa-solid fa-check cd-feature-check"></i>
-                        </li>
-                      </ul>
+                    <div class="cd-clamp-wrap" :class="{ 'cd-clamp-wrap--expanded': featuresExpanded }">
+                      <div class="cd-features-two-col">
+                        <ul class="cd-features-col">
+                          <li v-for="feat in leftFeatures" :key="feat" class="cd-feature-row">
+                            <span class="cd-feature-name">{{ feat }}</span>
+                            <i class="fa-solid fa-check cd-feature-check"></i>
+                          </li>
+                        </ul>
+                        <div class="cd-features-divider" aria-hidden="true"></div>
+                        <ul class="cd-features-col">
+                          <li v-for="feat in rightFeatures" :key="feat" class="cd-feature-row">
+                            <span class="cd-feature-name">{{ feat }}</span>
+                            <i class="fa-solid fa-check cd-feature-check"></i>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="cd-clamp-fade" aria-hidden="true" v-if="!featuresExpanded"></div>
                     </div>
+                    <button class="cd-show-more-btn" @click="featuresExpanded = !featuresExpanded">
+                      <span>{{ featuresExpanded ? 'Show less' : 'Show more' }}</span>
+                      <i class="fa-solid fa-chevron-down cd-show-more-chevron" :class="{ 'cd-show-more-chevron--up': featuresExpanded }"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -344,15 +351,19 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars.js'
 import { useUiStore } from '@/stores/ui.js'
+import { useFavoritesStore } from '@/stores/favorites.js'
+import { useAuthStore } from '@/stores/auth.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import ContactModal from '@/components/ui/ContactModal.vue'
 
-const route      = useRoute()
-const { locale } = useI18n()
-const carsStore  = useCarsStore()
-const uiStore    = useUiStore()
+const route          = useRoute()
+const { locale }     = useI18n()
+const carsStore      = useCarsStore()
+const uiStore        = useUiStore()
+const favoritesStore = useFavoritesStore()
+const authStore      = useAuthStore()
 
 // ── State ────────────────────────────────────────────────────
 const car              = ref(null)
@@ -362,14 +373,24 @@ const techOpen         = ref(true)
 const featuresOpen     = ref(true)
 const descOpen         = ref(true)
 const techExpanded     = ref(false)
+const featuresExpanded = ref(false)
 const descExpanded     = ref(false)
 const phoneRevealed    = ref(false)
-const isFavorited      = ref(false)
 const contactPhone     = '+48 123 456 789'
 const pageScrolled     = ref(false)
 
+// ── Favorites (driven by favoritesStore, not localStorage) ───
+const isFavorited = computed(() =>
+  favoritesStore.isFavorite(Number(route.params.id))
+)
+
 function onPageScroll() {
-  pageScrolled.value = window.scrollY > 10
+  pageScrolled.value = window.scrollY > 80
+  if (pageScrolled.value) {
+    document.body.classList.add('has-breadcrumb-pill')
+  } else {
+    document.body.classList.remove('has-breadcrumb-pill')
+  }
 }
 
 // ── Computed ─────────────────────────────────────────────────
@@ -416,14 +437,17 @@ const rightFeatures = computed(() =>
 onMounted(async () => {
   car.value = await carsStore.fetchCarById(route.params.id)
   loading.value = false
-  const favs = JSON.parse(localStorage.getItem('am_favorites') || '[]')
-  isFavorited.value = favs.includes(String(route.params.id))
+  // Ensure favorite IDs are loaded (noop if already loaded or not logged in)
+  if (authStore.isAuthenticated) {
+    await favoritesStore.fetchFavoriteIds()
+  }
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('scroll', onPageScroll, { passive: true })
   onPageScroll()
 })
 
 onUnmounted(() => {
+  document.body.classList.remove('has-breadcrumb-pill')
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('scroll', onPageScroll)
 })
@@ -497,16 +521,12 @@ function openContact() {
   uiStore.openContactModal?.()
 }
 
-function toggleFavorite() {
-  const id   = String(route.params.id)
-  let favs   = JSON.parse(localStorage.getItem('am_favorites') || '[]')
-  if (isFavorited.value) {
-    favs = favs.filter((f) => f !== id)
-  } else {
-    favs.push(id)
+async function toggleFavorite() {
+  if (!authStore.isAuthenticated) {
+    uiStore.addToast({ type: 'info', message: 'Please log in to save favorites.' })
+    return
   }
-  localStorage.setItem('am_favorites', JSON.stringify(favs))
-  isFavorited.value = !isFavorited.value
+  await favoritesStore.toggleFavorite(Number(route.params.id))
 }
 
 const linkCopied = ref(false)
@@ -578,13 +598,13 @@ async function shareListing() {
     box-shadow    0.35s ease;
 }
 
-/* Scrolled: become a pill exactly like the header pill */
+/* Scrolled: attach flush below the navbar pill — no gap, rounded only at bottom */
 .cd-breadcrumb-bar--scrolled {
-  top: calc(10px + var(--nav-height, 72px) + 6px); /* header pill top(10) + pill height(72) + gap(6) */
+  top: calc(8px + var(--nav-height, 72px)); /* flush directly below pill bar (pill top=10px + nav height=72px) */
   left: 24px;
   right: 24px;
-  border-radius: 50px;
-  border-top: none;
+  border-radius: 0 0 28px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
@@ -1276,5 +1296,13 @@ async function shareListing() {
   .cd-collapse-header { padding: 1rem 1.125rem; }
   .cd-collapse-inner,
   .cd-collapse-body--open .cd-collapse-inner { padding-left: 1.125rem; padding-right: 1.125rem; }
+}
+</style>
+
+<!-- Global override: flatten navbar pill bottom when breadcrumb bar is present -->
+<style>
+body.has-breadcrumb-pill .am-navbar-solid.scrolled,
+body.has-breadcrumb-pill .am-navbar-transparent.scrolled {
+  border-radius: 28px 28px 0 0 !important;
 }
 </style>

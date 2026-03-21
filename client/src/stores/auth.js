@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { useUiStore } from '@/stores/ui.js'
+import { useFavoritesStore } from '@/stores/favorites.js'
 
 export const useAuthStore = defineStore('auth', () => {
   // ── State ────────────────────────────────────────────────
@@ -14,11 +16,19 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin')
   const userName = computed(() => user.value?.name || '')
 
-  // ── Helpers ──────────────────────────────────────────────
-  function getFavoritesStore() {
-    // Lazy import to avoid circular dependency
-    const { useFavoritesStore } = require('@/stores/favorites.js')
-    return useFavoritesStore()
+  /**
+   * Apply a user's stored theme + locale preferences to the UI.
+   * Called after login and session restore so preferences sync across devices.
+   */
+  function applyUserPreferences(userData) {
+    if (!userData) return
+    const uiStore = useUiStore()
+    if (userData.theme && ['light', 'dark', 'system'].includes(userData.theme)) {
+      uiStore.setTheme(userData.theme)
+    }
+    if (userData.locale && ['en', 'pl', 'lt', 'ru'].includes(userData.locale)) {
+      uiStore.setLocale(userData.locale)
+    }
   }
 
   // ── Actions ──────────────────────────────────────────────
@@ -28,8 +38,10 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('am-token', tokenValue)
     localStorage.setItem('am-user', JSON.stringify(userData))
     axios.defaults.headers.common['Authorization'] = `Bearer ${tokenValue}`
+    // Apply saved theme + locale from user profile
+    applyUserPreferences(userData)
     // Load favorites after authentication
-    try { getFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
+    try { useFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
   }
 
   function clearAuth() {
@@ -40,7 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('am_favorites')
     delete axios.defaults.headers.common['Authorization']
     // Clear favorites on logout
-    try { getFavoritesStore().clearFavorites() } catch { /* silent */ }
+    try { useFavoritesStore().clearFavorites() } catch { /* silent */ }
   }
 
   function restoreSession() {
@@ -49,10 +61,13 @@ export const useAuthStore = defineStore('auth', () => {
     if (storedToken && storedUser) {
       try {
         token.value = storedToken
-        user.value = JSON.parse(storedUser)
+        const userData = JSON.parse(storedUser)
+        user.value = userData
         axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+        // Apply saved theme + locale from cached user profile
+        applyUserPreferences(userData)
         // Restore favorites IDs
-        try { getFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
+        try { useFavoritesStore().fetchFavoriteIds() } catch { /* silent */ }
       } catch {
         clearAuth()
       }
@@ -107,6 +122,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await axios.get('/api/auth/me')
       user.value = data.user
+      localStorage.setItem('am-user', JSON.stringify(data.user))
+      // Re-apply preferences in case they changed on another device
+      applyUserPreferences(data.user)
     } catch {
       clearAuth()
     }
@@ -126,6 +144,27 @@ export const useAuthStore = defineStore('auth', () => {
       return { success: false, message: msg }
     } finally {
       loading.value = false
+    }
+  }
+
+  /**
+   * Save theme + locale preferences to the user's profile in the database.
+   * Called whenever the user changes theme or locale while logged in.
+   */
+  async function savePreferences({ theme, locale }) {
+    if (!token.value) return { success: false }
+    try {
+      const payload = {}
+      if (theme)  payload.theme  = theme
+      if (locale) payload.locale = locale
+      if (!Object.keys(payload).length) return { success: true }
+
+      const { data } = await axios.put('/api/auth/me', payload)
+      user.value = data.user
+      localStorage.setItem('am-user', JSON.stringify(data.user))
+      return { success: true }
+    } catch {
+      return { success: false }
     }
   }
 
@@ -151,6 +190,6 @@ export const useAuthStore = defineStore('auth', () => {
     user, token, loading, error,
     isAuthenticated, isAdmin, userName,
     login, register, logout, restoreSession, fetchMe,
-    updateProfile, changePassword
+    updateProfile, savePreferences, changePassword
   }
 })

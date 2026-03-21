@@ -438,6 +438,14 @@ export default {
         noFavorites: 'Нет сохранённых авто',
         noFavoritesDesc: 'Просматривайте наш каталог и нажимайте на сердечко на любом автомобиле, чтобы сохранить его.',
         browseCars: 'Смотреть автомобили',
-        removeFavorite: 'Удалить'
+        removeFavorite: 'Удалить',
+        settings: 'Настройки',
+        settingsDesc: 'Персонализируйте опыт — выберите предпочитаемую тему и язык.',
+        settingsTheme: 'Тема',
+        settingsThemeDesc: 'Выберите визуальный стиль, который вам наиболее удобен.',
+        settingsLanguage: 'Язык',
+        settingsLanguageDesc: 'Выберите язык отображения сайта.',
+        settingsSaved: 'Настройки успешно сохранены.',
+        settingsSaveError: 'Не удалось сохранить настройки. Попробуйте снова.'
     }
 }

@@ -40,10 +40,21 @@
 <script setup>
 import { useUiStore } from '@/stores/ui.js'
 import { useAuthStore } from '@/stores/auth.js'
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const uiStore = useUiStore()
 const authStore = useAuthStore()
+const { locale } = useI18n()
+
+// Keep vue-i18n locale in sync with uiStore.locale (single source of truth).
+// This fires when applyUserPreferences() updates uiStore via setLocale(),
+// as well as when the user manually switches language.
+watch(
+  () => uiStore.locale,
+  (lang) => { locale.value = lang },
+  { immediate: true }
+)
 
 onMounted(() => {
   // Restore auth session on app load

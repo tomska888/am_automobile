@@ -115,10 +115,17 @@ router.post(
 
       const token = signToken(user)
 
+      // Fetch fresh user row so we return theme + locale
+      const [freshRows] = await pool.query(
+        'SELECT id, name, email, role, theme, locale FROM users WHERE id = ?',
+        [user.id]
+      )
+      const freshUser = freshRows[0] || { id: user.id, name: user.name, email: user.email, role: user.role, theme: 'system', locale: 'en' }
+
       res.json({
         success: true,
         token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        user: freshUser
       })
     } catch (err) {
       console.error('Login error:', err)
@@ -142,7 +149,7 @@ router.post('/logout', auth, (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = ? AND is_active = 1',
+      'SELECT id, name, email, role, theme, locale, created_at FROM users WHERE id = ? AND is_active = 1',
       [req.user.id]
     )
 
@@ -159,22 +166,29 @@ router.get('/me', auth, async (req, res) => {
 
 // ─── PUT /api/auth/me ─────────────────────────────────────────────────────────
 
+const VALID_THEMES  = ['light', 'dark', 'system']
+const VALID_LOCALES = ['en', 'pl', 'lt', 'ru']
+
 router.put(
   '/me',
   auth,
   [
     body('name').optional().trim().isLength({ min: 2, max: 100 }),
-    body('email').optional().isEmail({ allow_utf8_local_part: false }).toLowerCase()
+    body('email').optional().isEmail({ allow_utf8_local_part: false }).toLowerCase(),
+    body('theme').optional().isIn(VALID_THEMES).withMessage('Invalid theme'),
+    body('locale').optional().isIn(VALID_LOCALES).withMessage('Invalid locale')
   ],
   async (req, res) => {
     if (!handleValidation(req, res)) return
 
-    const { name, email } = req.body
+    const { name, email, theme, locale } = req.body
     const updates = []
     const values = []
 
-    if (name) { updates.push('name = ?'); values.push(name) }
-    if (email) { updates.push('email = ?'); values.push(email) }
+    if (name)   { updates.push('name = ?');   values.push(name) }
+    if (email)  { updates.push('email = ?');  values.push(email) }
+    if (theme)  { updates.push('theme = ?');  values.push(theme) }
+    if (locale) { updates.push('locale = ?'); values.push(locale) }
 
     if (!updates.length) {
       return res.status(400).json({ success: false, message: 'Nothing to update' })
@@ -196,7 +210,7 @@ router.put(
       await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values)
 
       const [rows] = await pool.query(
-        'SELECT id, name, email, role FROM users WHERE id = ?',
+        'SELECT id, name, email, role, theme, locale FROM users WHERE id = ?',
         [req.user.id]
       )
       res.json({ success: true, user: rows[0] })

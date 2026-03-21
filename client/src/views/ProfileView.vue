@@ -229,6 +229,88 @@
             </div>
           </div>
 
+          <!-- ── Settings Tab ─────────────────────────────────── -->
+          <div v-else-if="activeTab === 'settings'" key="settings" class="profile-card">
+            <div class="profile-card-header">
+              <div class="card-header-icon" style="background: rgba(99,102,241,0.1); color: #6366f1;">
+                <i class="fa-solid fa-sliders"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.settings') }}</h2>
+                <p>{{ $t('profile.settingsDesc') }}</p>
+              </div>
+            </div>
+
+            <Transition name="banner-fade">
+              <div v-if="settingsSuccess" class="alert-banner alert-success">
+                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.settingsSaved') }}
+              </div>
+            </Transition>
+            <Transition name="banner-fade">
+              <div v-if="settingsError" class="alert-banner alert-error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ settingsError }}
+              </div>
+            </Transition>
+
+            <!-- Theme -->
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <i class="fa-solid fa-circle-half-stroke"></i>
+                <div>
+                  <h3>{{ $t('profile.settingsTheme') }}</h3>
+                  <p>{{ $t('profile.settingsThemeDesc') }}</p>
+                </div>
+              </div>
+              <div class="settings-theme-grid">
+                <button
+                  v-for="opt in themeOptions"
+                  :key="opt.value"
+                  class="settings-theme-btn"
+                  :class="{ active: uiStore.theme === opt.value }"
+                  @click="setThemePref(opt.value)"
+                  :aria-pressed="uiStore.theme === opt.value"
+                >
+                  <i :class="[opt.icon, 'theme-icon']"></i>
+                  <span class="theme-label">{{ $t(opt.labelKey) }}</span>
+                  <span v-if="uiStore.theme === opt.value" class="theme-check">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Language -->
+            <div class="settings-section">
+              <div class="settings-section-header">
+                <i class="fa-solid fa-language"></i>
+                <div>
+                  <h3>{{ $t('profile.settingsLanguage') }}</h3>
+                  <p>{{ $t('profile.settingsLanguageDesc') }}</p>
+                </div>
+              </div>
+              <div class="settings-lang-grid">
+                <button
+                  v-for="lang in languageOptions"
+                  :key="lang.code"
+                  class="settings-lang-btn"
+                  :class="{ active: uiStore.locale === lang.code }"
+                  @click="setLocalePref(lang.code)"
+                  :aria-pressed="uiStore.locale === lang.code"
+                >
+                  <span class="lang-code">{{ lang.abbr }}</span>
+                  <span class="lang-name">{{ lang.name }}</span>
+                  <span v-if="uiStore.locale === lang.code" class="lang-check">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="settingsLoading" class="settings-saving">
+              <i class="fa-solid fa-spinner fa-spin"></i> {{ $t('common.saving') }}
+            </div>
+          </div>
+
           <!-- ── Security Tab ──────────────────────────────────── -->
           <div v-else-if="activeTab === 'security'" key="security" class="profile-card">
             <div class="profile-card-header">
@@ -388,6 +470,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.js'
+import { useUiStore } from '@/stores/ui.js'
 import { useFavoritesStore } from '@/stores/favorites.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -395,12 +478,14 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 const { t, locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
+const uiStore = useUiStore()
 const favStore = useFavoritesStore()
 
 // ── Tabs ──────────────────────────────────────────────────────────────
 const tabs = [
   { id: 'edit',      icon: 'fa-solid fa-user-pen',             label: 'profile.editProfile' },
   { id: 'favorites', icon: 'fa-solid fa-heart',                 label: 'profile.myFavorites' },
+  { id: 'settings',  icon: 'fa-solid fa-sliders',               label: 'profile.settings' },
   { id: 'security',  icon: 'fa-solid fa-shield-halved',         label: 'profile.security' },
   { id: 'danger',    icon: 'fa-solid fa-triangle-exclamation',  label: 'profile.dangerZone' },
 ]
@@ -555,6 +640,52 @@ async function savePassword() {
     setTimeout(() => { passwordSuccess.value = false }, 4000)
   } else {
     passwordError.value = result.message || t('profile.passwordError')
+  }
+}
+
+// ── Settings (theme + locale) ──────────────────────────────────────────
+const settingsLoading = ref(false)
+const settingsSuccess = ref(false)
+const settingsError = ref('')
+
+const themeOptions = [
+  { value: 'light',  icon: 'fa-solid fa-sun',     labelKey: 'theme.light' },
+  { value: 'system', icon: 'fa-solid fa-display',  labelKey: 'theme.system' },
+  { value: 'dark',   icon: 'fa-solid fa-moon',     labelKey: 'theme.dark' },
+]
+
+const languageOptions = [
+  { code: 'en', abbr: 'EN', name: 'English' },
+  { code: 'pl', abbr: 'PL', name: 'Polski' },
+  { code: 'lt', abbr: 'LT', name: 'Lietuvių' },
+  { code: 'ru', abbr: 'RU', name: 'Русский' },
+]
+
+function setThemePref(value) {
+  uiStore.setTheme(value)
+  saveSettings()
+}
+
+function setLocalePref(code) {
+  locale.value = code
+  uiStore.setLocale(code)
+  saveSettings()
+}
+
+async function saveSettings() {
+  settingsError.value = ''
+  settingsSuccess.value = false
+  settingsLoading.value = true
+  const result = await authStore.savePreferences({
+    theme:  uiStore.theme,
+    locale: uiStore.locale,
+  })
+  settingsLoading.value = false
+  if (result.success) {
+    settingsSuccess.value = true
+    setTimeout(() => { settingsSuccess.value = false }, 3000)
+  } else {
+    settingsError.value = t('profile.settingsSaveError')
   }
 }
 
@@ -1181,19 +1312,23 @@ onMounted(async () => {
 .fav-grid {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.85rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .fav-car-card {
   display: grid;
   grid-template-columns: 180px 1fr;
-  border-bottom: 1px solid var(--border-color);
-  transition: background 0.15s;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-.fav-car-card:last-child { border-bottom: none; }
-
-.fav-car-card:hover { background: var(--bg-secondary); }
+.fav-car-card:hover {
+  background: var(--bg-secondary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
 
 .fav-car-image {
   position: relative;
@@ -1386,6 +1521,198 @@ onMounted(async () => {
   box-shadow: 0 4px 14px rgba(239,68,68,0.3);
 }
 
+/* ── Settings Tab ─────────────────────────────────────────────────── */
+.settings-section {
+  padding: 1.5rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.settings-section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 1.5rem;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+.settings-section-header > i {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: #6366f1;
+  width: 1.25rem;
+  text-align: center;
+}
+.settings-section-header h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.15rem;
+  letter-spacing: -0.01em;
+}
+.settings-section-header p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Theme grid — 3 equal columns */
+.settings-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+.settings-theme-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 1.1rem 0.5rem 0.9rem;
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
+  font-family: inherit;
+  outline: none;
+  min-height: 5rem;
+}
+.settings-theme-btn:hover {
+  border-color: #6366f1;
+  background: var(--bg-primary);
+  transform: translateY(-1px);
+}
+.settings-theme-btn:focus-visible {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+}
+.settings-theme-btn.active {
+  border-color: #6366f1;
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.theme-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  display: block;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+.settings-theme-btn.active .theme-icon,
+.settings-theme-btn:hover .theme-icon {
+  color: #6366f1;
+}
+.theme-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+}
+.theme-check {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+}
+
+/* Language grid — 2 columns */
+.settings-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+.settings-lang-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
+  font-family: inherit;
+  text-align: left;
+  outline: none;
+  min-height: 3.5rem;
+}
+.settings-lang-btn:hover {
+  border-color: #6366f1;
+  background: var(--bg-primary);
+  transform: translateY(-1px);
+}
+.settings-lang-btn:focus-visible {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+}
+.settings-lang-btn.active {
+  border-color: #6366f1;
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.lang-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  background: rgba(99,102,241,0.1);
+  color: #6366f1;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.settings-lang-btn.active .lang-code {
+  background: #6366f1;
+  color: #fff;
+}
+.lang-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  line-height: 1.2;
+}
+.lang-check {
+  width: 1.15rem;
+  height: 1.15rem;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Saving / status indicators */
+.settings-saving {
+  margin: 0.75rem 1.5rem 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 /* ── Transitions ──────────────────────────────────────────────────── */
 .tab-fade-enter-active,
 .tab-fade-leave-active {
@@ -1428,7 +1755,7 @@ onMounted(async () => {
   }
 
   .profile-hero {
-    padding: calc(var(--nav-height, 72px) + 3.5rem) 1.25rem 2.25rem;
+    padding: calc(var(--nav-height, 72px) + 2rem) 1.25rem 2rem;
   }
 
   .profile-hero-inner {
@@ -1455,13 +1782,13 @@ onMounted(async () => {
   .profile-nav-item {
     flex-direction: column;
     text-align: center;
-    padding: 0.7rem 0.9rem;
+    padding: 0.55rem 0.35rem;
     border-bottom: none;
     border-right: 1px solid var(--border-color);
     white-space: nowrap;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    min-width: 80px;
+    gap: 0.2rem;
+    font-size: 0.68rem;
+    min-width: 0;
     flex: 1;
     justify-content: center;
   }
@@ -1491,6 +1818,8 @@ onMounted(async () => {
   .profile-form { padding: 1.25rem; }
   .danger-zone-section { padding: 1.25rem; }
 
+  .fav-grid { padding: 1rem; gap: 0.65rem; }
+
   .fav-car-card {
     grid-template-columns: 130px 1fr;
   }
@@ -1501,6 +1830,7 @@ onMounted(async () => {
 }
 
 @media (max-width: 480px) {
+  .fav-grid { padding: 0.75rem; gap: 0.6rem; }
   .fav-car-card { grid-template-columns: 1fr; }
   .fav-car-image { aspect-ratio: 16/9; }
   .fav-car-actions { flex-direction: column; }
@@ -1509,5 +1839,7 @@ onMounted(async () => {
   .form-actions .btn-secondary,
   .form-actions .btn-primary { width: 100%; justify-content: center; }
   .danger-item { flex-direction: column; align-items: flex-start; }
+  .settings-theme-grid { grid-template-columns: repeat(3, 1fr); }
+  .settings-lang-grid  { grid-template-columns: 1fr 1fr; }
 }
 </style>

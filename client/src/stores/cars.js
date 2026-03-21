@@ -42,16 +42,37 @@ export const useCarsStore = defineStore('cars', () => {
     })
 
     // ── Actions ──────────────────────────────────────────────
-    async function fetchCars() {
+    async function fetchCars(extraParams = {}) {
         loading.value = true
         error.value = null
         try {
+            // Split combined sort value (e.g. 'created_at_desc') into sort + order params
+            let sortParam = 'created_at'
+            let orderParam = 'DESC'
+            if (filters.sort) {
+                const lastUnderscore = filters.sort.lastIndexOf('_')
+                if (lastUnderscore !== -1) {
+                    const dir = filters.sort.slice(lastUnderscore + 1).toUpperCase()
+                    if (dir === 'ASC' || dir === 'DESC') {
+                        sortParam = filters.sort.slice(0, lastUnderscore)
+                        orderParam = dir
+                    } else {
+                        sortParam = filters.sort
+                    }
+                }
+            }
+
+            const activeFilters = Object.fromEntries(
+                Object.entries(filters).filter(([key, v]) => key !== 'sort' && v !== '')
+            )
+
             const params = {
                 page: pagination.page,
                 limit: pagination.limit,
-                ...Object.fromEntries(
-                    Object.entries(filters).filter(([, v]) => v !== '')
-                )
+                sort: sortParam,
+                order: orderParam,
+                ...activeFilters,
+                ...extraParams
             }
             const { data } = await axios.get('/api/cars', { params })
             // API returns { success, data: [...], pagination: { page, limit, total, totalPages } }

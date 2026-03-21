@@ -438,6 +438,14 @@ export default {
         noFavorites: 'Nėra išsaugotų automobilių',
         noFavoritesDesc: 'Naršykite mūsų katalogą ir paspauskite širdutę ant bet kurio automobilio, kad jį išsaugotumėte.',
         browseCars: 'Naršyti automobilius',
-        removeFavorite: 'Pašalinti'
+        removeFavorite: 'Pašalinti',
+        settings: 'Nustatymai',
+        settingsDesc: 'Personalizuokite savo patirtį — pasirinkite pageidaujamą temą ir kalbą.',
+        settingsTheme: 'Tema',
+        settingsThemeDesc: 'Pasirinkite vizualų stilių, kuris jums patogiausia.',
+        settingsLanguage: 'Kalba',
+        settingsLanguageDesc: 'Pasirinkite kalbą, kuria norite matyti svetainę.',
+        settingsSaved: 'Nustatymai sėkmingai išsaugoti.',
+        settingsSaveError: 'Nepavyko išsaugoti nustatymų. Bandykite dar kartą.'
     }
 }

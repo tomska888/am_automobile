@@ -438,6 +438,14 @@ export default {
         noFavorites: 'Brak zapisanych samochodów',
         noFavoritesDesc: 'Przeglądaj naszą ofertę i kliknij serce na dowolnym samochodzie, aby zapisać go tutaj.',
         browseCars: 'Przeglądaj samochody',
-        removeFavorite: 'Usuń'
+        removeFavorite: 'Usuń',
+        settings: 'Ustawienia',
+        settingsDesc: 'Personalizuj swoje doświadczenie — wybierz preferowany motyw i język.',
+        settingsTheme: 'Motyw',
+        settingsThemeDesc: 'Wybierz styl wizualny, który jest dla Ciebie najbardziej komfortowy.',
+        settingsLanguage: 'Język',
+        settingsLanguageDesc: 'Wybierz język, w którym chcesz wyświetlać witrynę.',
+        settingsSaved: 'Preferencje zostały zapisane.',
+        settingsSaveError: 'Nie udało się zapisać preferencji. Spróbuj ponownie.'
     }
 }
