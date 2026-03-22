@@ -1449,40 +1449,114 @@ h6 {
 }
 
 /* ── SPACING UTILITIES ───────────────────────────────────── */
-.mt-1 { margin-top: 0.25rem !important; }
-.mt-2 { margin-top: 0.5rem !important; }
-.mt-3 { margin-top: 0.75rem !important; }
-.mt-4 { margin-top: 1rem !important; }
-.mt-5 { margin-top: 1.5rem !important; }
+.mt-1 {
+    margin-top: 0.25rem !important;
+}
 
-.mb-2 { margin-bottom: 0.5rem !important; }
-.mb-3 { margin-bottom: 0.75rem !important; }
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
 
-.p-4  { padding: 1rem !important; }
-.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-.py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.mt-3 {
+    margin-top: 0.75rem !important;
+}
+
+.mt-4 {
+    margin-top: 1rem !important;
+}
+
+.mt-5 {
+    margin-top: 1.5rem !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem !important;
+}
+
+.p-4 {
+    padding: 1rem !important;
+}
+
+.px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+.py-4 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
 
 /* ── TEXT UTILITIES ──────────────────────────────────────── */
-.text-center  { text-align: center !important; }
-.text-left    { text-align: left !important; }
-.text-white   { color: #ffffff !important; }
-.text-accent  { color: var(--accent) !important; }
-.text-success { color: var(--success) !important; }
-.text-danger  { color: var(--danger) !important; }
-.text-warning { color: var(--warning) !important; }
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-white {
+    color: #ffffff !important;
+}
+
+.text-accent {
+    color: var(--accent) !important;
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.text-warning {
+    color: var(--warning) !important;
+}
 
 /* Typography scale */
-.text-xs   { font-size: 0.75rem !important; }
-.text-base { font-size: 1rem !important; }
-.text-lg   { font-size: 1.125rem !important; }
-.text-xl   { font-size: 1.25rem !important; }
-.text-2xl  { font-size: 1.5rem !important; }
-.text-3xl  { font-size: 1.875rem !important; }
-.text-4xl  { font-size: 2.25rem !important; }
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+.text-base {
+    font-size: 1rem !important;
+}
+
+.text-lg {
+    font-size: 1.125rem !important;
+}
+
+.text-xl {
+    font-size: 1.25rem !important;
+}
+
+.text-2xl {
+    font-size: 1.5rem !important;
+}
+
+.text-3xl {
+    font-size: 1.875rem !important;
+}
+
+.text-4xl {
+    font-size: 2.25rem !important;
+}
 
 /* Font weight */
-.fw-bold   { font-weight: 700 !important; }
-.fw-black  { font-weight: 900 !important; }
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-black {
+    font-weight: 900 !important;
+}
 
 /* ── BORDER UTILITIES ────────────────────────────────────── */
 .border-bottom {
@@ -1505,9 +1579,11 @@ h6 {
     .col-md-4 {
         /* handled by parent grid-template-columns */
     }
+
     .row:has(> .col-md-4) {
         grid-template-columns: repeat(3, 1fr);
     }
+
     .row:has(> .col-md-6) {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1515,6 +1591,7 @@ h6 {
 
 /* col-lg-3: 4 columns on ≥1024px */
 @media (min-width: 1024px) {
+
     .row:has(> .col-lg-3),
     .row:has(> .col-md-6.col-lg-3) {
         grid-template-columns: repeat(4, 1fr);
@@ -1537,34 +1614,72 @@ h6 {
 
 /* ── SPACING UTILITIES (Bootstrap-compatible names) ──────── */
 /* Margin-end (right in LTR) */
-.me-1 { margin-right: 0.25rem !important; }
-.me-2 { margin-right: 0.5rem !important; }
-.me-3 { margin-right: 0.75rem !important; }
+.me-1 {
+    margin-right: 0.25rem !important;
+}
+
+.me-2 {
+    margin-right: 0.5rem !important;
+}
+
+.me-3 {
+    margin-right: 0.75rem !important;
+}
 
 /* Margin-start (left in LTR) */
-.ms-1 { margin-left: 0.25rem !important; }
-.ms-2 { margin-left: 0.5rem !important; }
-.ms-3 { margin-left: 0.75rem !important; }
+.ms-1 {
+    margin-left: 0.25rem !important;
+}
+
+.ms-2 {
+    margin-left: 0.5rem !important;
+}
+
+.ms-3 {
+    margin-left: 0.75rem !important;
+}
 
 /* Margin-bottom extras */
-.mb-0 { margin-bottom: 0 !important; }
-.mb-1 { margin-bottom: 0.25rem !important; }
-.mb-4 { margin-bottom: 1rem !important; }
-.mb-8 { margin-bottom: 2rem !important; }
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-8 {
+    margin-bottom: 2rem !important;
+}
 
 /* Margin-top extras */
-.mt-4 { margin-top: 1rem !important; }
+.mt-4 {
+    margin-top: 1rem !important;
+}
 
 /* Padding */
-.p-4  { padding: 1rem !important; }
+.p-4 {
+    padding: 1rem !important;
+}
 
 /* ── TYPOGRAPHY UTILITIES ────────────────────────────────── */
 /* Font weight semibold */
-.fw-semi     { font-weight: 600 !important; }
-.fw-normal   { font-weight: 400 !important; }
+.fw-semi {
+    font-weight: 600 !important;
+}
+
+.fw-normal {
+    font-weight: 400 !important;
+}
 
 /* Text size aliases */
-.text-sm     { font-size: 0.875rem !important; }
+.text-sm {
+    font-size: 0.875rem !important;
+}
 
 /* ── OVERFLOW ────────────────────────────────────────────── */
 .overflow-x-auto {
@@ -1575,13 +1690,23 @@ h6 {
 /* ── DISPLAY RESPONSIVE ──────────────────────────────────── */
 /* d-none d-md-inline: hidden on mobile, inline from md */
 @media (max-width: 767px) {
-    .d-none-mobile { display: none !important; }
+    .d-none-mobile {
+        display: none !important;
+    }
 }
+
 /* For legacy usage in templates still referencing these: */
-.d-none { display: none !important; }
+.d-none {
+    display: none !important;
+}
 
 @media (min-width: 768px) {
-    .d-md-inline { display: inline !important; }
+    .d-md-inline {
+        display: inline !important;
+    }
+
     /* Override d-none on md+ */
-    .d-none.d-md-inline { display: inline !important; }
+    .d-none.d-md-inline {
+        display: inline !important;
+    }
 }

@@ -38,7 +38,7 @@
                   <i class="fa-solid fa-chevron-left"></i>
                 </button>
 
-                <div class="cd-gallery-img-wrap">
+                <div class="cd-gallery-img-wrap" @click="openLightbox(activeImageIndex)">
                   <img
                     :src="allImages[activeImageIndex] || '/assets/img/car-placeholder.jpg'"
                     :alt="car.make + ' ' + car.model + ' image ' + (activeImageIndex + 1)"
@@ -48,6 +48,9 @@
                   <span class="cd-gallery-counter">
                     <i class="fa-solid fa-images"></i>
                     {{ activeImageIndex + 1 }} / {{ allImages.length }}
+                  </span>
+                  <span class="cd-gallery-zoom-hint">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
                   </span>
                 </div>
 
@@ -81,6 +84,92 @@
                 </button>
               </div>
             </div>
+
+            <!-- ── Lightbox ─────────────────────────────────────────────── -->
+            <Teleport to="body">
+              <Transition name="lb-fade">
+                <div
+                  v-if="lightboxOpen"
+                  class="cd-lightbox"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Image lightbox"
+                  @click.self="closeLightbox"
+                >
+                  <!-- Close -->
+                  <button class="lb-close" @click="closeLightbox" aria-label="Close lightbox">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <!-- Counter -->
+                  <div class="lb-counter">
+                    {{ activeImageIndex + 1 }} / {{ allImages.length }}
+                  </div>
+
+                  <!-- Prev arrow -->
+                  <button
+                    class="lb-arrow lb-arrow--left"
+                    @click="prevImage"
+                    :disabled="allImages.length <= 1"
+                    aria-label="Previous image"
+                  >
+                    <i class="fa-solid fa-chevron-left"></i>
+                  </button>
+
+                  <!-- Image with pan-zoom on hover -->
+                  <div class="lb-img-wrap">
+                    <Transition name="lb-img" mode="out-in">
+                      <div
+                        :key="activeImageIndex"
+                        class="lb-zoom-container"
+                        :class="{ 'is-panning': lbPanning }"
+                        @mouseenter="lbPanning = true"
+                        @mouseleave="lbPanning = false; lbResetZoom()"
+                        @mousemove="lbOnMouseMove"
+                        ref="lbZoomRef"
+                      >
+                        <img
+                          ref="lbImgRef"
+                          :src="allImages[activeImageIndex]"
+                          :alt="car.make + ' ' + car.model + ' image ' + (activeImageIndex + 1)"
+                          class="lb-img"
+                          :style="lbImgStyle"
+                          @error="onImgError"
+                        />
+                        <span class="lb-zoom-hint" v-if="!lbPanning">
+                          <i class="fa-solid fa-magnifying-glass-plus"></i>
+                          Hover to zoom
+                        </span>
+                      </div>
+                    </Transition>
+                  </div>
+
+                  <!-- Next arrow -->
+                  <button
+                    class="lb-arrow lb-arrow--right"
+                    @click="nextImage"
+                    :disabled="allImages.length <= 1"
+                    aria-label="Next image"
+                  >
+                    <i class="fa-solid fa-chevron-right"></i>
+                  </button>
+
+                  <!-- Thumbnail strip -->
+                  <div class="lb-thumbs" v-if="allImages.length > 1">
+                    <button
+                      v-for="(img, idx) in allImages"
+                      :key="idx"
+                      class="lb-thumb"
+                      :class="{ 'lb-thumb--active': idx === activeImageIndex }"
+                      @click="setImage(idx)"
+                      :aria-label="'View image ' + (idx + 1)"
+                    >
+                      <img :src="img" :alt="'Thumb ' + (idx + 1)" @error="onImgError" />
+                    </button>
+                  </div>
+                </div>
+              </Transition>
+            </Teleport>
 
             <!-- RIGHT COLUMN: Sticky Info Card (in DOM before data-col so mobile shows: gallery → card → data) -->
             <div class="cd-right-col">
@@ -378,6 +467,31 @@ const descExpanded     = ref(false)
 const phoneRevealed    = ref(false)
 const contactPhone     = '+48 123 456 789'
 const pageScrolled     = ref(false)
+const lightboxOpen     = ref(false)
+
+// ── Lightbox pan-zoom ────────────────────────────────────────
+const lbPanning    = ref(false)
+const lbZoomRef    = ref(null)
+const lbImgRef     = ref(null)
+const lbImgStyle   = ref({})
+
+function lbOnMouseMove(e) {
+  const el = lbZoomRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = ((e.clientX - rect.left) / rect.width)  * 100
+  const y = ((e.clientY - rect.top)  / rect.height) * 100
+  lbImgStyle.value = {
+    transform: 'scale(2.2)',
+    transformOrigin: `${x}% ${y}%`,
+    transition: 'transform-origin 0.05s linear',
+    cursor: 'crosshair',
+  }
+}
+
+function lbResetZoom() {
+  lbImgStyle.value = {}
+}
 
 // ── Favorites (driven by favoritesStore, not localStorage) ───
 const isFavorited = computed(() =>
@@ -467,9 +581,21 @@ function nextImage() {
     (activeImageIndex.value + 1) % allImages.value.length
 }
 
+function openLightbox(idx) {
+  activeImageIndex.value = idx
+  lightboxOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+function closeLightbox() {
+  lightboxOpen.value = false
+  document.body.style.overflow = ''
+}
+
 function handleKeydown(e) {
   if (e.key === 'ArrowLeft')  prevImage()
   if (e.key === 'ArrowRight') nextImage()
+  if (e.key === 'Escape' && lightboxOpen.value) closeLightbox()
 }
 
 function onImgError(e) {
@@ -675,7 +801,8 @@ async function shareListing() {
 .cd-right-col {
   grid-area: card;
   position: sticky;
-  top: calc(var(--nav-height, 72px) + 1.25rem);
+  /* nav + breadcrumb bar (40px) + gap */
+  top: calc(var(--nav-height, 72px) + 40px + 1.25rem);
   align-self: start;
 }
 
@@ -701,6 +828,31 @@ async function shareListing() {
   position: relative;
   width: 100%;
   height: 100%;
+  cursor: zoom-in;
+}
+
+.cd-gallery-img-wrap:hover .cd-gallery-zoom-hint {
+  opacity: 1;
+}
+
+.cd-gallery-zoom-hint {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.875rem;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
 }
 
 .cd-gallery-img {
@@ -708,7 +860,11 @@ async function shareListing() {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.3s ease;
+}
+
+.cd-gallery-img-wrap:hover .cd-gallery-img {
+  transform: scale(1.02);
 }
 
 /* Counter badge */
@@ -1296,6 +1452,203 @@ async function shareListing() {
   .cd-collapse-header { padding: 1rem 1.125rem; }
   .cd-collapse-inner,
   .cd-collapse-body--open .cd-collapse-inner { padding-left: 1.125rem; padding-right: 1.125rem; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════════════════════════ */
+.cd-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Close button */
+.lb-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 10;
+}
+.lb-close:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* Counter */
+.lb-counter {
+  position: absolute;
+  top: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+/* Prev / Next arrows */
+.lb-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  z-index: 10;
+}
+.lb-arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+}
+.lb-arrow:disabled { opacity: 0.2; cursor: default; }
+.lb-arrow--left  { left: 1rem; }
+.lb-arrow--right { right: 1rem; }
+
+/* Image */
+.lb-img-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  overflow: hidden;
+  padding: 3.5rem 4.5rem 1rem;
+}
+
+.lb-img {
+  max-width: 100%;
+  max-height: calc(100vh - 11rem);
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+  display: block;
+  user-select: none;
+}
+
+/* Thumbnail strip */
+.lb-thumbs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0.5rem 1rem 0.25rem;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.lb-thumb {
+  flex-shrink: 0;
+  width: 60px;
+  height: 42px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.55;
+  padding: 0;
+  background: none;
+}
+.lb-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.lb-thumb:hover { opacity: 0.85; }
+.lb-thumb--active {
+  border-color: #fff;
+  opacity: 1;
+}
+
+/* Fade transition */
+.lb-fade-enter-active,
+.lb-fade-leave-active { transition: opacity 0.25s ease; }
+.lb-fade-enter-from,
+.lb-fade-leave-to { opacity: 0; }
+
+/* Image swap transition */
+.lb-img-enter-active,
+.lb-img-leave-active { transition: opacity 0.18s ease; }
+.lb-img-enter-from,
+.lb-img-leave-to { opacity: 0; }
+
+/* Zoom container */
+.lb-zoom-container {
+  position: relative;
+  overflow: hidden;
+  cursor: zoom-in;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: calc(100vh - 11rem);
+}
+.lb-zoom-container.is-panning { cursor: crosshair; }
+.lb-zoom-container .lb-img {
+  transition: transform 0.1s ease, transform-origin 0.05s linear;
+  max-width: 100%;
+  max-height: calc(100vh - 11rem);
+  object-fit: contain;
+}
+
+/* Zoom hint overlay */
+.lb-zoom-hint {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .lb-arrow--left  { left: 0.25rem; }
+  .lb-arrow--right { right: 0.25rem; }
+  .lb-img-wrap { padding: 3rem 3rem 0.5rem; }
+  .lb-arrow { width: 2.25rem; height: 2.25rem; font-size: 0.8rem; }
+  .lb-zoom-container { max-height: calc(100vh - 14rem); }
+  .lb-zoom-container .lb-img { max-height: calc(100vh - 14rem); }
 }
 </style>
 
