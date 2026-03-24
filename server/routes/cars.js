@@ -107,7 +107,7 @@ router.get('/', async (req, res) => {
       `SELECT
         c.id, c.make, c.model, c.year, c.price, c.mileage,
         c.fuel_type, c.transmission, c.body_type, c.engine_size,
-        c.power_hp, c.color, c.status, c.featured,
+        c.power_hp, c.color, c.owners, c.status, c.featured,
         c.image_url, c.gallery, c.description, c.features,
         c.vin, c.created_at, c.updated_at
        FROM cars c
