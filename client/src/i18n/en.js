@@ -84,7 +84,7 @@ export default {
     inventory: {
         title: 'Our Inventory',
         subtitle: 'Browse our wide selection of vehicles',
-        searchPlaceholder: 'Search make, model...',
+        searchPlaceholder: 'Search',
         filters: {
             title: 'Filters',
             make: 'Make',

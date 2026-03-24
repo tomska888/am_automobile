@@ -16,129 +16,244 @@
     <!-- Main Layout -->
     <section class="inv-body">
       <div class="inv-container">
+
+        <!-- ── MOBILE FILTER TOGGLE BAR ───────────────── -->
+        <!-- Sentinel: when this scrolls out of view the bar becomes a floating pill -->
+        <div ref="mobileBarSentinel" class="inv-mobile-bar-sentinel" aria-hidden="true"></div>
+
+        <!-- Placeholder keeps layout stable when bar goes fixed -->
+        <div v-if="isBarFloating" class="inv-mobile-bar-placeholder" :style="{ height: mobileBarHeight + 'px' }" aria-hidden="true"></div>
+
+        <div ref="mobileBarEl" class="inv-mobile-bar" :class="{ floating: isBarFloating }">
+          <!-- Left half: Filters -->
+          <button class="inv-mobile-filter-btn" @click="toggleMobileSidebar" :aria-expanded="mobileSidebarOpen">
+            <i class="fa-solid fa-sliders"></i>
+            {{ $t('inventory.filters.title') }}
+            <span v-if="carsStore.activeFilterCount > 0" class="inv-mobile-filter-badge">{{ carsStore.activeFilterCount }}</span>
+          </button>
+
+          <!-- Divider -->
+          <div class="inv-bar-divider" aria-hidden="true"></div>
+
+          <!-- Right half: Sort -->
+          <div class="inv-bar-sort-half">
+            <div class="cdd-wrap cdd-sort" :class="{ open: openDrop === 'sort' }" v-click-outside="() => closeDrop('sort')">
+              <button type="button" class="cdd-trigger" @click="toggleDrop('sort')" :aria-expanded="openDrop === 'sort'">
+                <i class="fa-solid fa-arrow-up-wide-short inv-sort-icon"></i>
+                <span class="cdd-value">{{ sortOptions.find(s => s.val === carsStore.filters.sort)?.label || $t('inventory.sort.newest') }}</span>
+                <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+              </button>
+              <div class="cdd-menu cdd-menu-right" :class="{ 'cdd-menu-up': isBarFloating }" role="listbox">
+                <button
+                  type="button"
+                  class="cdd-option"
+                  v-for="s in sortOptions"
+                  :key="s.val"
+                  :class="{ selected: carsStore.filters.sort === s.val }"
+                  @click="pickSort(s.val)"
+                >
+                  <span>{{ s.label }}</span>
+                  <i v-if="carsStore.filters.sort === s.val" class="fa-solid fa-check cdd-check"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="inv-layout">
 
           <!-- ── FILTER SIDEBAR ─────────────────────────── -->
-          <aside class="inv-sidebar">
+          <aside class="inv-sidebar" :class="{ 'mobile-open': mobileSidebarOpen }">
             <div class="inv-filter-card">
               <div class="inv-filter-header">
                 <h2 class="inv-filter-title">
                   <i class="fa-solid fa-sliders"></i>
                   {{ $t('inventory.filters.title') }}
                 </h2>
-                <button
-                  v-if="carsStore.activeFilterCount > 0"
-                  class="inv-reset-btn"
-                  @click="carsStore.resetFilters()"
-                >
-                  <i class="fa-solid fa-times"></i>
-                  {{ $t('inventory.filters.reset') }} ({{ carsStore.activeFilterCount }})
+                <div class="inv-filter-header-actions">
+                  <button
+                    v-if="carsStore.activeFilterCount > 0"
+                    class="inv-reset-btn"
+                    @click="carsStore.resetFilters()"
+                  >
+                    <i class="fa-solid fa-times"></i>
+                    {{ $t('inventory.filters.reset') }} ({{ carsStore.activeFilterCount }})
+                  </button>
+                  <button class="inv-sidebar-close" @click="mobileSidebarOpen = false" aria-label="Close filters">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ── FILTER BODY (padded wrapper) ── -->
+              <div class="inv-filter-body">
+
+                <!-- Search -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.searchPlaceholder') }}</label>
+                  <div class="inv-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass inv-search-icon"></i>
+                    <input
+                      type="search"
+                      class="inv-input inv-search-input"
+                      :placeholder="$t('inventory.searchPlaceholder')"
+                      v-model="localFilters.search"
+                      @input="debouncedSearch"
+                    />
+                  </div>
+                </div>
+
+                <!-- Make -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.make') }}</label>
+                  <div class="cdd-wrap" :class="{ open: openDrop === 'make' }" v-click-outside="() => closeDrop('make')">
+                    <button type="button" class="cdd-trigger" @click="toggleDrop('make')" :aria-expanded="openDrop === 'make'">
+                      <span class="cdd-value">{{ localFilters.make || $t('inventory.filters.make') }}</span>
+                      <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                    </button>
+                    <div class="cdd-menu" role="listbox">
+                      <button type="button" class="cdd-option" :class="{ selected: localFilters.make === '' }" @click="pickDrop('make', '')">
+                        <span>{{ $t('inventory.filters.make') }}</span>
+                        <i v-if="localFilters.make === ''" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                      <button type="button" class="cdd-option" v-for="m in makes" :key="m" :class="{ selected: localFilters.make === m }" @click="pickDrop('make', m)">
+                        <span>{{ m }}</span>
+                        <i v-if="localFilters.make === m" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Year Range -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.yearFrom') }}</label>
+                  <div class="inv-range-row">
+                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearFrom')" v-model="localFilters.year_min" min="1990" :max="currentYear" />
+                    <span class="inv-range-sep">—</span>
+                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearTo')" v-model="localFilters.year_max" min="1990" :max="currentYear" />
+                  </div>
+                </div>
+
+                <!-- Price Range -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.priceFrom') }}</label>
+                  <div class="inv-range-row">
+                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceFrom')" v-model="localFilters.price_min" min="0" step="1000" />
+                    <span class="inv-range-sep">—</span>
+                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceTo')" v-model="localFilters.price_max" min="0" step="1000" />
+                  </div>
+                </div>
+
+                <!-- Fuel Type -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.fuelType') }}</label>
+                  <div class="cdd-wrap" :class="{ open: openDrop === 'fuel' }" v-click-outside="() => closeDrop('fuel')">
+                    <button type="button" class="cdd-trigger" @click="toggleDrop('fuel')" :aria-expanded="openDrop === 'fuel'">
+                      <span class="cdd-value">{{ localFilters.fuel_type ? $t(`car.fuel.${localFilters.fuel_type}`) : $t('inventory.filters.fuelType') }}</span>
+                      <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                    </button>
+                    <div class="cdd-menu" role="listbox">
+                      <button type="button" class="cdd-option" :class="{ selected: localFilters.fuel_type === '' }" @click="pickDrop('fuel_type', '')">
+                        <span>{{ $t('inventory.filters.fuelType') }}</span>
+                        <i v-if="localFilters.fuel_type === ''" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                      <button type="button" class="cdd-option" v-for="f in fuelTypes" :key="f" :class="{ selected: localFilters.fuel_type === f }" @click="pickDrop('fuel_type', f)">
+                        <span>{{ $t(`car.fuel.${f}`) }}</span>
+                        <i v-if="localFilters.fuel_type === f" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Transmission -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.transmission') }}</label>
+                  <div class="cdd-wrap" :class="{ open: openDrop === 'transmission' }" v-click-outside="() => closeDrop('transmission')">
+                    <button type="button" class="cdd-trigger" @click="toggleDrop('transmission')" :aria-expanded="openDrop === 'transmission'">
+                      <span class="cdd-value">{{ localFilters.transmission ? $t(`car.trans.${localFilters.transmission}`) : $t('inventory.filters.transmission') }}</span>
+                      <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                    </button>
+                    <div class="cdd-menu" role="listbox">
+                      <button type="button" class="cdd-option" :class="{ selected: localFilters.transmission === '' }" @click="pickDrop('transmission', '')">
+                        <span>{{ $t('inventory.filters.transmission') }}</span>
+                        <i v-if="localFilters.transmission === ''" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                      <button type="button" class="cdd-option" v-for="t in transmissions" :key="t" :class="{ selected: localFilters.transmission === t }" @click="pickDrop('transmission', t)">
+                        <span>{{ $t(`car.trans.${t}`) }}</span>
+                        <i v-if="localFilters.transmission === t" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Body Type -->
+                <div class="inv-filter-group">
+                  <label class="inv-filter-label">{{ $t('inventory.filters.bodyType') }}</label>
+                  <div class="cdd-wrap" :class="{ open: openDrop === 'body_type' }" v-click-outside="() => closeDrop('body_type')">
+                    <button type="button" class="cdd-trigger" @click="toggleDrop('body_type')" :aria-expanded="openDrop === 'body_type'">
+                      <span class="cdd-value">{{ localFilters.body_type ? $t(`car.body.${localFilters.body_type}`) : $t('inventory.filters.bodyType') }}</span>
+                      <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                    </button>
+                    <div class="cdd-menu" role="listbox">
+                      <button type="button" class="cdd-option" :class="{ selected: localFilters.body_type === '' }" @click="pickDrop('body_type', '')">
+                        <span>{{ $t('inventory.filters.bodyType') }}</span>
+                        <i v-if="localFilters.body_type === ''" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                      <button type="button" class="cdd-option" v-for="b in bodyTypes" :key="b.val" :class="{ selected: localFilters.body_type === b.val }" @click="pickDrop('body_type', b.val)">
+                        <span>{{ $t(`car.body.${b.val}`) }}</span>
+                        <i v-if="localFilters.body_type === b.val" class="fa-solid fa-check cdd-check"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Apply -->
+                <button class="inv-apply-btn" @click="applyFilters">
+                  <i class="fa-solid fa-check"></i>
+                  {{ $t('inventory.filters.apply') }}
                 </button>
-              </div>
 
-              <!-- Search -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.searchPlaceholder') }}</label>
-                <div class="inv-search-wrap">
-                  <i class="fa-solid fa-magnifying-glass inv-search-icon"></i>
-                  <input
-                    type="search"
-                    class="inv-input inv-search-input"
-                    :placeholder="$t('inventory.searchPlaceholder')"
-                    v-model="localFilters.search"
-                    @input="debouncedSearch"
-                  />
-                </div>
-              </div>
-
-              <!-- Make -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.make') }}</label>
-                <select class="inv-select" v-model="localFilters.make">
-                  <option value="">{{ $t('inventory.filters.make') }}</option>
-                  <option v-for="m in makes" :key="m" :value="m">{{ m }}</option>
-                </select>
-              </div>
-
-              <!-- Year Range -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.yearFrom') }}</label>
-                <div class="inv-range-row">
-                  <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearFrom')" v-model="localFilters.year_min" min="1990" :max="currentYear" />
-                  <span class="inv-range-sep">—</span>
-                  <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearTo')" v-model="localFilters.year_max" min="1990" :max="currentYear" />
-                </div>
-              </div>
-
-              <!-- Price Range -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.priceFrom') }}</label>
-                <div class="inv-range-row">
-                  <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceFrom')" v-model="localFilters.price_min" min="0" step="1000" />
-                  <span class="inv-range-sep">—</span>
-                  <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceTo')" v-model="localFilters.price_max" min="0" step="1000" />
-                </div>
-              </div>
-
-              <!-- Fuel Type -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.fuelType') }}</label>
-                <select class="inv-select" v-model="localFilters.fuel_type">
-                  <option value="">{{ $t('inventory.filters.fuelType') }}</option>
-                  <option value="petrol">{{ $t('car.fuel.petrol') }}</option>
-                  <option value="diesel">{{ $t('car.fuel.diesel') }}</option>
-                  <option value="electric">{{ $t('car.fuel.electric') }}</option>
-                  <option value="hybrid">{{ $t('car.fuel.hybrid') }}</option>
-                  <option value="lpg">{{ $t('car.fuel.lpg') }}</option>
-                </select>
-              </div>
-
-              <!-- Transmission -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.transmission') }}</label>
-                <select class="inv-select" v-model="localFilters.transmission">
-                  <option value="">{{ $t('inventory.filters.transmission') }}</option>
-                  <option value="manual">{{ $t('car.trans.manual') }}</option>
-                  <option value="automatic">{{ $t('car.trans.automatic') }}</option>
-                  <option value="semiAuto">{{ $t('car.trans.semiAuto') }}</option>
-                </select>
-              </div>
-
-              <!-- Body Type -->
-              <div class="inv-filter-group">
-                <label class="inv-filter-label">{{ $t('inventory.filters.bodyType') }}</label>
-                <select class="inv-select" v-model="localFilters.body_type">
-                  <option value="">{{ $t('inventory.filters.bodyType') }}</option>
-                  <option v-for="b in bodyTypes" :key="b.val" :value="b.val">{{ $t(`car.body.${b.val}`) }}</option>
-                </select>
-              </div>
-
-              <!-- Apply -->
-              <button class="inv-apply-btn" @click="applyFilters">
-                <i class="fa-solid fa-check"></i>
-                {{ $t('inventory.filters.apply') }}
-              </button>
+              </div><!-- end .inv-filter-body -->
             </div>
           </aside>
+
+          <!-- ── MOBILE SIDEBAR OVERLAY ──────────────────── -->
+          <div
+            v-if="mobileSidebarOpen"
+            class="inv-sidebar-overlay"
+            @click="mobileSidebarOpen = false"
+            aria-hidden="true"
+          ></div>
 
           <!-- ── RESULTS AREA ─────────────────────────── -->
           <div class="inv-results">
 
-            <!-- Toolbar -->
+            <!-- Toolbar (desktop only) -->
             <div class="inv-toolbar">
               <p class="inv-count">
                 {{ $t('inventory.results', { count: carsStore.pagination.total }) }}
               </p>
               <div class="inv-sort-wrap">
                 <label class="inv-sort-label">{{ $t('inventory.sort.label') }}:</label>
-                <select class="inv-select inv-sort-select" v-model="carsStore.filters.sort" @change="carsStore.fetchCars()">
-                  <option value="created_at_desc">{{ $t('inventory.sort.newest') }}</option>
-                  <option value="created_at_asc">{{ $t('inventory.sort.oldest') }}</option>
-                  <option value="price_asc">{{ $t('inventory.sort.priceAsc') }}</option>
-                  <option value="price_desc">{{ $t('inventory.sort.priceDesc') }}</option>
-                  <option value="year_desc">{{ $t('inventory.sort.yearDesc') }}</option>
-                  <option value="year_asc">{{ $t('inventory.sort.yearAsc') }}</option>
-                </select>
+                <div class="cdd-wrap cdd-sort" :class="{ open: openDrop === 'sort' }" v-click-outside="() => closeDrop('sort')">
+                  <button type="button" class="cdd-trigger" @click="toggleDrop('sort')" :aria-expanded="openDrop === 'sort'">
+                    <span class="cdd-value">{{ sortOptions.find(s => s.val === carsStore.filters.sort)?.label || $t('inventory.sort.newest') }}</span>
+                    <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                  </button>
+                  <div class="cdd-menu cdd-menu-right" role="listbox">
+                    <button
+                      type="button"
+                      class="cdd-option"
+                      v-for="s in sortOptions"
+                      :key="s.val"
+                      :class="{ selected: carsStore.filters.sort === s.val }"
+                      @click="pickSort(s.val)"
+                    >
+                      <span>{{ s.label }}</span>
+                      <i v-if="carsStore.filters.sort === s.val" class="fa-solid fa-check cdd-check"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -204,8 +319,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -214,12 +330,66 @@ import Pagination from '@/components/ui/Pagination.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import ContactModal from '@/components/ui/ContactModal.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const carsStore = useCarsStore()
 const currentYear = new Date().getFullYear()
 
 const localFilters = reactive({ ...carsStore.filters })
 
+// ── Mobile sidebar state ─────────────────────────────────
+const mobileSidebarOpen = ref(false)
+
+function toggleMobileSidebar() {
+  mobileSidebarOpen.value = !mobileSidebarOpen.value
+}
+
+// ── Floating pill: becomes fixed when sentinel scrolls out of view ──
+const mobileBarSentinel = ref(null)
+const mobileBarEl = ref(null)
+const isBarFloating = ref(false)
+const mobileBarHeight = ref(0)
+let _barObserver = null
+
+// ── Custom dropdown state ────────────────────────────────
+const openDrop = ref(null)
+
+function toggleDrop(name) {
+  openDrop.value = openDrop.value === name ? null : name
+}
+
+function closeDrop(name) {
+  if (openDrop.value === name) openDrop.value = null
+}
+
+function pickDrop(field, value) {
+  localFilters[field] = value
+  openDrop.value = null
+  applyFilters()
+}
+
+function pickSort(value) {
+  carsStore.filters.sort = value
+  openDrop.value = null
+  carsStore.fetchCars()
+}
+
+// ── Click-outside directive ──────────────────────────────
+// Uses pointerup (not pointerdown) so touch-scroll inside dropdown
+// doesn't accidentally close the menu before the gesture completes.
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (e) => {
+      if (!el.contains(e.target)) binding.value(e)
+    }
+    document.addEventListener('pointerup', el._clickOutsideHandler)
+  },
+  unmounted(el) {
+    document.removeEventListener('pointerup', el._clickOutsideHandler)
+  }
+}
+
+// ── Filter helpers ───────────────────────────────────────
 let searchTimer = null
 function debouncedSearch() {
   clearTimeout(searchTimer)
@@ -239,14 +409,62 @@ function openCarDetail(car) {
   router.push({ name: 'car-detail', params: { id: car.id } })
 }
 
+// ── Static data ──────────────────────────────────────────
 const makes = ['Audi', 'BMW', 'Ford', 'Honda', 'Hyundai', 'Kia', 'Mercedes-Benz', 'Nissan', 'Opel', 'Renault', 'Skoda', 'Toyota', 'Volkswagen', 'Volvo']
+const fuelTypes = ['petrol', 'diesel', 'electric', 'hybrid', 'lpg']
+const transmissions = ['manual', 'automatic', 'semiAuto']
 const bodyTypes = [
   { val: 'sedan' }, { val: 'suv' }, { val: 'hatchback' },
   { val: 'combi' }, { val: 'coupe' }, { val: 'cabrio' },
   { val: 'van' },   { val: 'pickup' }
 ]
 
-onMounted(() => carsStore.fetchCars())
+const sortOptions = computed(() => [
+  { val: 'created_at_desc', label: t('inventory.sort.newest') },
+  { val: 'created_at_asc',  label: t('inventory.sort.oldest') },
+  { val: 'price_asc',       label: t('inventory.sort.priceAsc') },
+  { val: 'price_desc',      label: t('inventory.sort.priceDesc') },
+  { val: 'year_desc',       label: t('inventory.sort.yearDesc') },
+  { val: 'year_asc',        label: t('inventory.sort.yearAsc') },
+])
+
+onMounted(() => {
+  carsStore.fetchCars()
+
+  // Only activate on mobile widths
+  const setupObserver = () => {
+    if (window.innerWidth > 768) return
+    if (_barObserver) _barObserver.disconnect()
+    if (!mobileBarSentinel.value) return
+    _barObserver = new IntersectionObserver(
+      ([entry]) => { isBarFloating.value = !entry.isIntersecting },
+      { threshold: 0, rootMargin: '0px' }
+    )
+    _barObserver.observe(mobileBarSentinel.value)
+  }
+
+  // Measure the bar height before it leaves the flow
+  const measureBar = () => {
+    if (mobileBarEl.value) {
+      mobileBarHeight.value = mobileBarEl.value.offsetHeight
+        + parseInt(getComputedStyle(mobileBarEl.value).marginBottom || 0)
+    }
+  }
+
+  measureBar()
+  setupObserver()
+
+  const handleResize = () => {
+    measureBar()
+    setupObserver()
+  }
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  if (_barObserver) _barObserver.disconnect()
+  window.removeEventListener('resize', () => {})
+})
 </script>
 
 <style scoped>
@@ -319,6 +537,123 @@ onMounted(() => carsStore.fetchCars())
   padding: 0 1.5rem;
 }
 
+/* ── MOBILE FILTER BAR ─────────────────────────────── */
+
+/* Sentinel: zero-height element that triggers the floating state */
+.inv-mobile-bar-sentinel {
+  display: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.inv-mobile-bar {
+  display: none;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 1rem;
+  padding: 0;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  /* No overflow:hidden — that would clip the sort dropdown menu */
+  transition: box-shadow 0.25s ease;
+  position: relative;
+}
+
+/* ── FLOATING STATE ────────────────────────────────── */
+.inv-mobile-bar.floating {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 590;
+  width: calc(100% - 2.5rem);
+  max-width: 420px;
+  margin-bottom: 0;
+  border-radius: 999px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: pillRise 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pillRise {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── PILL LEFT HALF: Filters (accent colored) ──────── */
+.inv-mobile-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex: 1;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border: none;
+  /* Round only the left side to match pill shape */
+  border-radius: 999px 0 0 999px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.inv-mobile-filter-btn:hover {
+  opacity: 0.9;
+}
+
+.inv-mobile-filter-btn[aria-expanded="true"] {
+  opacity: 0.85;
+}
+
+.inv-mobile-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* ── DIVIDER ───────────────────────────────────────── */
+.inv-bar-divider {
+  width: 1.5px;
+  align-self: stretch;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+/* ── PILL RIGHT HALF: Sort ─────────────────────────── */
+.inv-bar-sort-half {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.inv-bar-sort-half .cdd-wrap {
+  flex: 1;
+}
+
+/* Sort icon */
+.inv-sort-icon {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
 /* ── LAYOUT ────────────────────────────────────────── */
 .inv-layout {
   display: grid;
@@ -344,7 +679,22 @@ onMounted(() => carsStore.fetchCars())
 .inv-sidebar {
   position: sticky;
   top: calc(var(--nav-height, 72px) + 1.5rem);
+  max-height: calc(100vh - var(--nav-height, 72px) - 3rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 16px;
+  /* Thin scrollbar for sidebar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
 }
+
+.inv-sidebar::-webkit-scrollbar { width: 4px; }
+.inv-sidebar::-webkit-scrollbar-track { background: transparent; }
+.inv-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+.inv-sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 .inv-filter-card {
   background: var(--bg-primary);
@@ -361,6 +711,33 @@ onMounted(() => carsStore.fetchCars())
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
+}
+
+.inv-filter-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inv-sidebar-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.inv-sidebar-close:hover {
+  background: var(--danger-light, #fee2e2);
+  color: var(--danger);
 }
 
 .inv-filter-title {
@@ -566,6 +943,345 @@ onMounted(() => carsStore.fetchCars())
   font-size: 0.82rem;
 }
 
+/* ── CUSTOM DROPDOWN ───────────────────────────────── */
+.cdd-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Trigger button — looks like an input field */
+.cdd-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.625rem 0.875rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary) !important;
+  background: var(--bg-secondary) !important;
+  border: 1.5px solid var(--border-color) !important;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  gap: 0.5rem;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.cdd-trigger:hover {
+  border-color: var(--accent) !important;
+  background: var(--bg-primary) !important;
+}
+
+.cdd-wrap.open .cdd-trigger {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--bg-primary) !important;
+}
+
+/* Value text */
+.cdd-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+.cdd-value.placeholder {
+  color: var(--text-secondary) !important;
+  font-weight: 400;
+}
+
+/* Chevron arrow */
+.cdd-arrow {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+.cdd-wrap.open .cdd-arrow {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+/* Dropdown panel */
+.cdd-menu {
+  display: none;
+  position: absolute;
+  z-index: 200;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
+  overscroll-behavior: contain;      /* prevent page scroll bleed */
+  touch-action: pan-y;               /* allow vertical swipe inside */
+  padding: 0.35rem;
+  animation: cddFadeIn 0.18s ease;
+}
+
+/* Right-aligned variant — for sort dropdown in toolbar */
+.cdd-menu.cdd-menu-right {
+  left: auto;
+  right: 0;
+  min-width: 200px;
+}
+
+/* Upward-opening variant — used in floating pill bar */
+.cdd-menu.cdd-menu-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  animation: cddFadeUp 0.18s ease;
+}
+
+@keyframes cddFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cdd-wrap.open .cdd-menu {
+  display: block;
+}
+
+/* Option rows */
+.cdd-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  gap: 0.5rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cdd-option:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.cdd-option.selected {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cdd-option.selected:hover {
+  background: var(--accent-light);
+}
+
+/* Checkmark icon */
+.cdd-check {
+  font-size: 0.75rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Sort dropdown in toolbar — compact width, auto-size */
+.cdd-sort {
+  width: auto;
+  min-width: 180px;
+}
+
+.cdd-sort .cdd-trigger {
+  min-height: 38px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+}
+
+/* Sort trigger inside the floating pill — fills the right half */
+.inv-mobile-bar .cdd-sort {
+  width: 100%;
+  min-width: unset;
+}
+
+.inv-mobile-bar .cdd-sort .cdd-trigger {
+  background: var(--bg-primary) !important;
+  border: none !important;
+  box-shadow: none !important;
+  /* Round only the right side to match pill shape */
+  border-radius: 0 999px 999px 0;
+  padding: 0.7rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: unset;
+  width: 100%;
+  color: var(--text-primary) !important;
+}
+
+.inv-mobile-bar .cdd-sort .cdd-trigger:hover {
+  background: var(--bg-secondary) !important;
+}
+
+.inv-mobile-bar .cdd-sort.open .cdd-trigger {
+  background: var(--bg-secondary) !important;
+}
+
+/* Scrollbar styling for the dropdown list */
+.cdd-menu::-webkit-scrollbar { width: 4px; }
+.cdd-menu::-webkit-scrollbar-track { background: transparent; }
+.cdd-menu::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+.cdd-menu::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Open animation */
+@keyframes cddFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .cdd-menu {
+    max-height: 220px;
+  }
+
+  .cdd-option {
+    min-height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .cdd-sort {
+    min-width: 140px;
+  }
+
+  /* Show sentinel + mobile filter bar, hide desktop toolbar */
+  .inv-mobile-bar-sentinel {
+    display: block;
+  }
+
+  .inv-mobile-bar {
+    display: flex;
+  }
+
+  .inv-toolbar {
+    display: none;
+  }
+
+  /* Add bottom padding to results so floating pill doesn't cover last card */
+  .inv-results {
+    padding-bottom: 5rem;
+  }
+
+  /* Sidebar — bottom-sheet drawer on mobile */
+  .inv-sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 600;
+    max-height: none;
+    overflow: visible;
+    border-radius: 0;
+    /* Hidden state: slid off-screen downward */
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    /* Remove sticky scrollbar styles */
+    scrollbar-width: unset;
+  }
+
+  .inv-sidebar.mobile-open {
+    transform: translateY(0);
+  }
+
+  .inv-filter-card {
+    border-radius: 20px 20px 0 0;
+    max-height: 82svh;
+    overflow-y: auto;
+    transform: none;
+    transition: none;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+    border-bottom: none;
+    padding: 0;
+  }
+
+  /* Accent header strip inside the mobile drawer */
+  .inv-filter-card .inv-filter-header {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .inv-filter-card .inv-filter-title {
+    color: #ffffff;
+  }
+
+  .inv-filter-card .inv-filter-title i {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .inv-filter-card .inv-reset-btn {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .inv-filter-card .inv-reset-btn:hover {
+    color: #ffffff;
+    opacity: 1;
+  }
+
+  .inv-sidebar-close {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+  }
+
+  .inv-sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+  }
+
+  /* Filter body — single padded wrapper replaces per-element margins */
+  .inv-filter-body {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .inv-filter-body .inv-apply-btn {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  /* Overlay background */
+  .inv-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 599;
+    background: rgba(0, 0, 0, 0.5);
+    animation: overlayIn 0.25s ease forwards;
+  }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
 /* ── CHIPS ─────────────────────────────────────────── */
 .inv-chips {
   display: flex;
@@ -650,3 +1366,4 @@ onMounted(() => carsStore.fetchCars())
   }
 }
 </style>
+

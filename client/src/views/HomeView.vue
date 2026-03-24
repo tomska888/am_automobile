@@ -832,7 +832,7 @@ onBeforeUnmount(() => {
   background: linear-gradient(135deg, var(--accent), var(--primary-dark));
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 50px;
   padding: 10px 20px;
   font-size: 0.9rem;
   font-weight: 600;
