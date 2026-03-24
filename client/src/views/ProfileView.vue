@@ -518,13 +518,13 @@ const avatarGradient = computed(() => {
 
 // ── Member Since ───────────────────────────────────────────────────────
 const memberSince = computed(() => {
-  const u = authStore.user
-  const date = u?.created_at ? new Date(u.created_at) : new Date()
+  const createdAt = authStore.user?.created_at
+  if (!createdAt) return '—'
   return new Intl.DateTimeFormat(locale.value, {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric'
-  }).format(date)
+  }).format(new Date(createdAt))
 })
 
 // ── Navigation helpers ─────────────────────────────────────────────────

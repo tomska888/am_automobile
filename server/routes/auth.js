@@ -210,7 +210,7 @@ router.put(
       await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values)
 
       const [rows] = await pool.query(
-        'SELECT id, name, email, role, theme, locale FROM users WHERE id = ?',
+        'SELECT id, name, email, role, theme, locale, created_at FROM users WHERE id = ?',
         [req.user.id]
       )
       res.json({ success: true, user: rows[0] })
