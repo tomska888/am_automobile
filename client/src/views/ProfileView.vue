@@ -188,12 +188,16 @@
                   </div>
                 </div>
                 <div class="fav-car-body">
-                  <div class="fav-car-info">
-                    <h3 class="fav-car-name" @click="goToCar(car.id)">
-                      {{ car.make }} {{ car.model }}
-                    </h3>
-                    <p class="fav-car-year">{{ car.year }}</p>
-                    <p class="fav-car-price">{{ formatPrice(car.price) }}</p>
+                  <div class="fav-car-content">
+                    <div class="fav-car-header">
+                      <div class="fav-car-title">
+                        <h3 class="fav-car-name" @click="goToCar(car.id)">
+                          {{ car.make }} {{ car.model }}
+                        </h3>
+                        <p class="fav-car-year">{{ car.year }}</p>
+                      </div>
+                      <p class="fav-car-price">{{ formatPrice(car.price) }}</p>
+                    </div>
                     <div class="fav-car-specs">
                       <span v-if="car.mileage" class="fav-spec">
                         <i class="fa-solid fa-road"></i> {{ formatMileage(car.mileage) }}
@@ -221,7 +225,6 @@
                       @click="favStore.toggleFavorite(car.id)"
                     >
                       <i :class="favStore.isToggling(car.id) ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-heart-crack'"></i>
-                      {{ $t('profile.removeFavorite') }}
                     </button>
                   </div>
                 </div>
@@ -698,9 +701,9 @@ async function handleLogout() {
 // ── Format helpers ─────────────────────────────────────────────────────
 function formatPrice(price) {
   if (!price) return '—'
-  return new Intl.NumberFormat(locale.value === 'pl' ? 'pl-PL' : 'en-EU', {
+  return new Intl.NumberFormat('de-DE', {
     style:    'currency',
-    currency: locale.value === 'pl' ? 'PLN' : 'EUR',
+    currency: 'EUR',
     maximumFractionDigits: 0
   }).format(price)
 }
@@ -862,7 +865,7 @@ onMounted(async () => {
   flex-direction: column;
   gap: 1rem;
   position: sticky;
-  top: calc(var(--nav-height, 72px) + 1rem);
+  top: calc(var(--nav-height, 72px) + 3rem);
 }
 
 .profile-nav {
@@ -1310,77 +1313,96 @@ onMounted(async () => {
 
 /* ── Favorites Grid ───────────────────────────────────────────────── */
 .fav-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding: 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem;
 }
 
 .fav-car-card {
-  display: grid;
-  grid-template-columns: 180px 1fr;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  transition: background 0.15s, box-shadow 0.15s;
+  background: var(--bg-primary);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fav-car-card:hover {
-  background: var(--bg-secondary);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
 }
 
 .fav-car-image {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  aspect-ratio: 16/11;
+  aspect-ratio: 16/10;
+  background: var(--bg-secondary);
 }
 
 .fav-car-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 
-.fav-car-card:hover .fav-car-image img { transform: scale(1.04); }
+.fav-car-card:hover .fav-car-image img { transform: scale(1.06); }
 
 .fav-status-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .fav-status-badge {
-  padding: 0.3rem 0.75rem;
+  padding: 0.35rem 0.9rem;
   border-radius: 50px;
   font-size: 0.78rem;
   font-weight: 700;
   background: rgba(0,0,0,0.6);
   color: #fff;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.badge-sold { background: rgba(239,68,68,0.85); }
-.badge-reserved { background: rgba(234,179,8,0.85); }
+.badge-sold { background: rgba(239,68,68,0.9); }
+.badge-reserved { background: rgba(234,179,8,0.9); }
 
 .fav-car-body {
-  padding: 1.1rem 1.5rem;
+  padding: 1.1rem 1.25rem 1.25rem;
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
   justify-content: space-between;
-  gap: 0.75rem;
-  min-width: 0;
+  flex: 1;
 }
+
+.fav-car-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.fav-car-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fav-car-title { min-width: 0; }
 
 .fav-car-name {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 0.15rem;
+  margin: 0 0 0.1rem;
   cursor: pointer;
   transition: color 0.15s;
   white-space: nowrap;
@@ -1391,75 +1413,82 @@ onMounted(async () => {
 .fav-car-name:hover { color: var(--accent); }
 
 .fav-car-year {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  margin: 0 0 0.15rem;
+  font-weight: 500;
+  margin: 0;
 }
 
 .fav-car-price {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--accent);
-  margin: 0;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .fav-car-specs {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
-  margin-top: 0.25rem;
 }
 
 .fav-spec {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.78rem;
+  gap: 0.28rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
   background: var(--bg-secondary);
-  padding: 0.25rem 0.6rem;
+  padding: 0.22rem 0.55rem;
   border-radius: 50px;
   border: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 
-.fav-spec i { font-size: 0.7rem; color: var(--accent); }
+.fav-spec i { font-size: 0.65rem; color: var(--accent); }
 
 .fav-car-actions {
-  display: flex;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
   align-items: center;
-  flex-wrap: wrap;
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .fav-view-btn {
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1rem;
   font-size: 0.82rem;
+  justify-content: center;
 }
 
 .btn-remove-fav {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1rem;
-  background: rgba(239,68,68,0.08);
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: rgba(239,68,68,0.07);
   color: #ef4444;
-  border: 1.5px solid rgba(239,68,68,0.2);
+  border: 1.5px solid rgba(239,68,68,0.18);
   border-radius: 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  flex-shrink: 0;
 }
 
 .btn-remove-fav:hover:not(:disabled) {
-  background: rgba(239,68,68,0.14);
-  border-color: rgba(239,68,68,0.4);
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.45);
   transform: translateY(-1px);
 }
 
 .btn-remove-fav:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
@@ -1818,23 +1847,17 @@ onMounted(async () => {
   .profile-form { padding: 1.25rem; }
   .danger-zone-section { padding: 1.25rem; }
 
-  .fav-grid { padding: 1rem; gap: 0.65rem; }
-
-  .fav-car-card {
-    grid-template-columns: 130px 1fr;
+  .fav-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
   }
-
-  .fav-car-body { padding: 0.875rem 1rem; }
 
   .pw-requirements { flex-direction: column; gap: 0.3rem; }
 }
 
 @media (max-width: 480px) {
-  .fav-grid { padding: 0.75rem; gap: 0.6rem; }
-  .fav-car-card { grid-template-columns: 1fr; }
-  .fav-car-image { aspect-ratio: 16/9; }
-  .fav-car-actions { flex-direction: column; }
-  .fav-view-btn, .btn-remove-fav { width: 100%; justify-content: center; }
+  .fav-grid { padding: 0.75rem; gap: 0.75rem; }
   .form-actions { flex-direction: column; }
   .form-actions .btn-secondary,
   .form-actions .btn-primary { width: 100%; justify-content: center; }

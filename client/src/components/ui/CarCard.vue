@@ -107,9 +107,9 @@ function handleFavToggle() {
 
 function formatPrice(price) {
   if (!price) return '—'
-  return new Intl.NumberFormat(locale.value === 'pl' ? 'pl-PL' : 'en-EU', {
+  return new Intl.NumberFormat('de-DE', {
     style:    'currency',
-    currency: locale.value === 'pl' ? 'PLN' : 'EUR',
+    currency: 'EUR',
     maximumFractionDigits: 0
   }).format(price)
 }
