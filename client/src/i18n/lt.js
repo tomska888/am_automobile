@@ -135,6 +135,8 @@ export default {
         power: 'Galia',
         features: 'Įranga',
         description: 'Aprašymas',
+        owners: 'Savininkai',
+        ownersLong: 'Ankstesnių savininkų skaičius',
         statusLabel: 'Būsena',
         status: {
             available: 'Galimas',
@@ -319,6 +321,8 @@ export default {
                 colorPlaceholder: 'pvz. Juoda metalik',
                 vin: 'VIN numeris',
                 vinPlaceholder: '17 simbolių VIN kodas',
+                owners: 'Savininkų skaičius',
+                ownersPlaceholder: 'pvz. 1',
                 price: 'Kaina (EUR)',
                 priceRequired: 'Įveskite teisingą kainą',
                 status: 'Statusas',

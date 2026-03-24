@@ -269,8 +269,8 @@
                   <div class="cd-qs-item">
                     <span class="cd-qs-icon"><i class="fa-solid fa-user-shield"></i></span>
                     <div class="cd-qs-body">
-                      <span class="cd-qs-label">Vehicle owner</span>
-                      <span class="cd-qs-value">1</span>
+                      <span class="cd-qs-label">{{ $t('car.owners') }}</span>
+                      <span class="cd-qs-value">{{ car.owners ?? '—' }}</span>
                     </div>
                   </div>
                 </div>
@@ -329,8 +329,8 @@
                             <td class="cd-tech-value">{{ car.year }}</td>
                           </tr>
                           <tr>
-                            <td class="cd-tech-label">Number of owners of the vehicle</td>
-                            <td class="cd-tech-value">1</td>
+                            <td class="cd-tech-label">{{ $t('car.ownersLong') }}</td>
+                            <td class="cd-tech-value">{{ car.owners ?? '—' }}</td>
                           </tr>
                           <tr v-if="car.vin">
                             <td class="cd-tech-label">Vehicle number</td>
@@ -618,6 +618,9 @@ function capitalize(str) {
 // ── Rich-text description renderer ───────────────────────────
 function renderDescription(text) {
   if (!text) return ''
+  // If content contains HTML tags, it was saved by the WYSIWYG editor — pass through directly
+  if (/<[a-z][\s\S]*>/i.test(text)) return text
+  // Legacy: plain markdown-style text
   const lines = text.split('\n')
   let html = ''
   for (const line of lines) {
@@ -1237,6 +1240,31 @@ async function shareListing() {
 }
 :deep(.cd-desc-rich ul.cd-desc-list li) {
   margin-bottom: 0.25rem;
+}
+
+/* WYSIWYG HTML output styles */
+:deep(.cd-desc-rich strong),
+:deep(.cd-desc-rich b) {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+:deep(.cd-desc-rich ul) {
+  margin: 0 0 0.75rem 1.25rem;
+  padding: 0;
+  list-style: disc;
+}
+:deep(.cd-desc-rich li) {
+  margin-bottom: 0.25rem;
+}
+:deep(.cd-desc-rich hr) {
+  border: none;
+  border-top: 1.5px solid var(--border-color);
+  margin: 0.85rem 0;
+}
+:deep(.cd-desc-rich br) {
+  display: block;
+  content: '';
+  margin-top: 0.4rem;
 }
 
 /* ══════════════════════════════════════════════════════════

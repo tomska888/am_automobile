@@ -167,7 +167,7 @@ router.get(
         `SELECT
           c.id, c.make, c.model, c.year, c.price, c.mileage,
           c.fuel_type, c.transmission, c.body_type, c.engine_size,
-          c.power_hp, c.color, c.status, c.featured,
+          c.power_hp, c.color, c.owners, c.status, c.featured,
           c.image_url, c.gallery, c.description, c.features,
           c.vin, c.created_at, c.updated_at
          FROM cars c WHERE c.id = ?`,
@@ -211,7 +211,7 @@ router.post(
 
     const {
       make, model, year, price, mileage, fuel_type, transmission,
-      body_type, engine_size, power_hp, color, vin, status = 'available',
+      body_type, engine_size, power_hp, color, vin, owners, status = 'available',
       featured = false, image_url, gallery = [], features = [], description
     } = req.body
 
@@ -223,14 +223,14 @@ router.post(
       const [result] = await pool.query(
         `INSERT INTO cars
           (make, model, year, price, mileage, fuel_type, transmission,
-           body_type, engine_size, power_hp, color, vin, status, featured,
+           body_type, engine_size, power_hp, color, vin, owners, status, featured,
            image_url, gallery, features, description)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           make.trim(), model.trim(), Number(year), Number(price),
           num(mileage), fuel_type,
           str(transmission), str(body_type), num(engine_size),
-          num(power_hp), str(color), str(vin), status,
+          num(power_hp), str(color), str(vin), num(owners), status,
           featured ? 1 : 0, str(image_url),
           JSON.stringify(Array.isArray(gallery) ? gallery : []),
           JSON.stringify(Array.isArray(features) ? features : []),
@@ -266,12 +266,12 @@ router.put(
     if (!validate(req, res)) return
 
     // Fields that must be stored as NULL when empty (not as empty string '')
-    const nullableNumbers = new Set(['mileage', 'engine_size', 'power_hp'])
+    const nullableNumbers = new Set(['mileage', 'engine_size', 'power_hp', 'owners'])
     const nullableStrings = new Set(['transmission', 'body_type', 'color', 'vin', 'image_url', 'description'])
 
     const allowed = [
       'make', 'model', 'year', 'price', 'mileage', 'fuel_type', 'transmission',
-      'body_type', 'engine_size', 'power_hp', 'color', 'vin', 'status',
+      'body_type', 'engine_size', 'power_hp', 'color', 'vin', 'owners', 'status',
       'featured', 'image_url', 'description'
     ]
 

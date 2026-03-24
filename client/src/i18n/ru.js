@@ -135,6 +135,8 @@ export default {
         power: 'Мощность',
         features: 'Комплектация',
         description: 'Описание',
+        owners: 'Владельцы',
+        ownersLong: 'Количество предыдущих владельцев',
         statusLabel: 'Статус',
         status: {
             available: 'В наличии',
@@ -319,6 +321,8 @@ export default {
                 colorPlaceholder: 'напр. Чёрный металлик',
                 vin: 'VIN-номер',
                 vinPlaceholder: '17-символьный VIN-код',
+                owners: 'Количество владельцев',
+                ownersPlaceholder: 'напр. 1',
                 price: 'Цена (EUR)',
                 priceRequired: 'Укажите корректную цену',
                 status: 'Статус',

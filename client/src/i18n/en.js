@@ -135,6 +135,8 @@ export default {
         power: 'Power',
         features: 'Features',
         description: 'Description',
+        owners: 'Owners',
+        ownersLong: 'Number of previous owners',
         statusLabel: 'Status',
         status: {
             available: 'Available',
@@ -319,6 +321,8 @@ export default {
                 colorPlaceholder: 'e.g. Midnight Black',
                 vin: 'VIN Number',
                 vinPlaceholder: '17-character VIN code',
+                owners: 'Number of Owners',
+                ownersPlaceholder: 'e.g. 1',
                 price: 'Price (EUR)',
                 priceRequired: 'Please enter a valid price',
                 status: 'Status',

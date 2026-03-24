@@ -135,6 +135,8 @@ export default {
         power: 'Moc',
         features: 'Wyposażenie',
         description: 'Opis',
+        owners: 'Właściciele',
+        ownersLong: 'Liczba poprzednich właścicieli',
         statusLabel: 'Status',
         status: {
             available: 'Dostępny',
@@ -319,6 +321,8 @@ export default {
                 colorPlaceholder: 'np. Czarny metalik',
                 vin: 'Numer VIN',
                 vinPlaceholder: '17-znakowy kod VIN',
+                owners: 'Liczba właścicieli',
+                ownersPlaceholder: 'np. 1',
                 price: 'Cena (PLN)',
                 priceRequired: 'Podaj poprawną cenę',
                 status: 'Status',

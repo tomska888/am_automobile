@@ -268,6 +268,21 @@
                       style="text-transform: uppercase"
                     />
                   </div>
+
+                  <div class="form-group">
+                    <label class="form-label-am" for="car-owners">
+                      {{ $t('admin.cars.form.owners') }}
+                    </label>
+                    <input
+                      id="car-owners"
+                      v-model.number="form.owners"
+                      type="number"
+                      class="form-control-am"
+                      min="0"
+                      max="99"
+                      :placeholder="$t('admin.cars.form.ownersPlaceholder')"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -282,23 +297,39 @@
                   <label class="form-label-am" for="car-description">
                     {{ $t('admin.cars.form.description') }}
                   </label>
-                  <textarea
+                  <!-- Rich-text toolbar -->
+                  <div class="desc-toolbar">
+                    <button type="button" class="desc-toolbar-btn" @mousedown.prevent="descExec('bold')" title="Bold">
+                      <i class="fas fa-bold"></i>
+                    </button>
+                    <button type="button" class="desc-toolbar-btn" @mousedown.prevent="descExec('insertUnorderedList')" title="Bullet list">
+                      <i class="fas fa-list-ul"></i>
+                    </button>
+                    <div class="desc-toolbar-divider"></div>
+                    <button type="button" class="desc-toolbar-btn" @mousedown.prevent="descInsertHr()" title="Horizontal divider line">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                  <!-- WYSIWYG contenteditable editor -->
+                  <div
                     id="car-description"
-                    v-model="form.description"
-                    class="form-control-am"
-                    rows="4"
-                    :placeholder="$t('admin.cars.form.descriptionPlaceholder')"
-                  ></textarea>
+                    ref="descEditorRef"
+                    class="form-control-am desc-editor"
+                    contenteditable="true"
+                    :data-placeholder="$t('admin.cars.form.descriptionPlaceholder')"
+                    @input="onDescInput"
+                    @keydown.enter.exact="onDescEnter"
+                  ></div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group features-group">
                   <label class="form-label-am" for="car-features">
                     {{ $t('admin.cars.form.features') }}
                   </label>
                   <textarea
                     id="car-features"
                     v-model="featuresText"
-                    class="form-control-am"
+                    class="form-control-am features-textarea"
                     rows="5"
                     placeholder="Air conditioning&#10;GPS Navigation&#10;Heated seats&#10;Rear camera&#10;Adaptive cruise control"
                   ></textarea>
@@ -458,7 +489,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars'
 import { useUiStore } from '@/stores/ui'
@@ -485,6 +516,30 @@ const { t } = useI18n()
 const currentYear = new Date().getFullYear()
 const submitting = ref(false)
 const errors = ref({})
+const descEditorRef = ref(null)
+
+// ─── WYSIWYG description editor ───────────────────────────────────────────────
+function descExec(command) {
+  descEditorRef.value?.focus()
+  document.execCommand(command, false, null)
+  onDescInput()
+}
+
+function descInsertHr() {
+  descEditorRef.value?.focus()
+  document.execCommand('insertHTML', false, '<hr/><p><br></p>')
+  onDescInput()
+}
+
+function onDescInput() {
+  form.value.description = descEditorRef.value?.innerHTML ?? ''
+}
+
+function onDescEnter(e) {
+  // Default enter behaviour is fine; we just prevent double-<br> in some browsers
+  // by letting execCommand handle it naturally.
+  // No-op — keep default contenteditable behaviour.
+}
 
 // ─── Photo state ──────────────────────────────────────────────────────────────
 // Each entry: { url: string, publicId: string|null, loadError: boolean }
@@ -512,6 +567,7 @@ const defaultForm = () => ({
   power_hp: '',
   color: '',
   vin: '',
+  owners: '',
   status: 'available',
   featured: false,
   description: '',
@@ -555,8 +611,17 @@ watch(
       errors.value = {}
       uploadError.value = ''
       isDragOver.value = false
+      // Populate the WYSIWYG editor with saved HTML
+      nextTick(() => {
+        if (descEditorRef.value) {
+          descEditorRef.value.innerHTML = form.value.description || ''
+        }
+      })
     } else {
       errors.value = {}
+      nextTick(() => {
+        if (descEditorRef.value) descEditorRef.value.innerHTML = ''
+      })
     }
   }
 )
@@ -695,6 +760,7 @@ async function handleSubmit() {
     power_hp:     toNum(form.value.power_hp),
     color:        toStr(form.value.color),
     vin:          toStr(form.value.vin),
+    owners:       toNum(form.value.owners),
     status:       form.value.status,
     featured:     !!form.value.featured,
     image_url,
@@ -844,7 +910,6 @@ async function handleSubmit() {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
 }
 
 .form-group-checkbox {
@@ -1262,4 +1327,113 @@ async function handleSubmit() {
     padding: var(--space-8) var(--space-3);
   }
 }
+
+/* ── Description toolbar ──────────────────────────────────────────────────── */
+.desc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.desc-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.desc-toolbar-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--accent);
+}
+
+.desc-toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 var(--space-1);
+  flex-shrink: 0;
+}
+
+.desc-toolbar-hint {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--text-muted, var(--text-secondary));
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.desc-toolbar-hint code {
+  font-family: monospace;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 0 3px;
+  font-size: 0.68rem;
+}
+
+/* ── Features field spacing & line height ────────────────────────────────── */
+.features-group {
+  margin-top: var(--space-6);
+}
+
+.features-textarea {
+  line-height: 2;
+  letter-spacing: 0.01em;
+}
+
+/* ── WYSIWYG editor div ───────────────────────────────────────────────────── */
+.desc-editor {
+  border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
+  min-height: 140px;
+  padding: var(--space-3) var(--space-4);
+  line-height: 1.65;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+}
+
+/* Placeholder via data attribute */
+.desc-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Content styles inside editor */
+.desc-editor strong,
+.desc-editor b { font-weight: 700; }
+
+.desc-editor ul {
+  padding-left: 1.4em;
+  margin: 0.4em 0;
+  list-style: disc;
+}
+
+.desc-editor li { margin: 0.1em 0; }
+
+.desc-editor hr {
+  border: none;
+  border-top: 1.5px solid var(--border-color);
+  margin: 0.75em 0;
+}
+
+.desc-editor p { margin: 0.25em 0; }
 </style>
