@@ -315,6 +315,90 @@
 
     <AppFooter />
     <ContactModal />
+
+    <!-- ── DESKTOP COMPARE BAR (bottom pill) ──────────── -->
+    <Transition name="compare-bar-slide">
+      <div v-if="compareStore.count > 0" class="cmp-bar" role="region" aria-label="Car comparison bar">
+        <div class="cmp-bar-inner">
+          <!-- Car name pills -->
+          <div class="cmp-bar-cars">
+            <div
+              v-for="(car, idx) in compareStore.cars"
+              :key="car.id"
+              class="cmp-bar-car"
+            >
+              <span class="cmp-bar-car-name">{{ car.make }} {{ car.model }}</span>
+              <button
+                class="cmp-bar-remove"
+                @click="compareStore.removeCar(car.id)"
+                :aria-label="$t('compare.removeCar')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              <span v-if="idx < compareStore.cars.length - 1" class="cmp-bar-sep" aria-hidden="true">|</span>
+            </div>
+          </div>
+
+          <div class="cmp-bar-actions">
+            <button class="cmp-bar-clear" @click="compareStore.clearAll()">
+              <i class="fa-solid fa-trash-can"></i>
+              {{ $t('compare.clearAll') }}
+            </button>
+            <button
+              class="cmp-bar-btn"
+              :disabled="!compareStore.canCompare"
+              @click="goToCompare"
+            >
+              <i class="fa-solid fa-code-compare"></i>
+              {{ $t('compare.startCompare', { count: compareStore.count }) }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── MOBILE COMPARE CARD (above floating pill) ──── -->
+    <Transition name="compare-card-slide">
+      <div v-if="compareStore.count > 0" class="cmp-mobile-card" role="region" aria-label="Car comparison">
+        <!-- Header row: label + count badge -->
+        <div class="cmp-mobile-header">
+          <span class="cmp-mobile-label">
+            <i class="fa-solid fa-code-compare"></i>
+            {{ $t('compare.compareBtn') }}
+          </span>
+          <span class="cmp-mobile-count">{{ compareStore.count }}</span>
+        </div>
+
+        <!-- One row per car with divider -->
+        <div class="cmp-mobile-list">
+          <div
+            v-for="car in compareStore.cars"
+            :key="car.id"
+            class="cmp-mobile-row"
+          >
+            <span class="cmp-mobile-car-name">{{ car.make }} {{ car.model }}</span>
+            <button
+              class="cmp-mobile-remove"
+              @click.stop="compareStore.removeCar(car.id)"
+              :aria-label="$t('compare.removeCar')"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Compare CTA -->
+        <button
+          class="cmp-mobile-btn"
+          :disabled="!compareStore.canCompare"
+          @click="goToCompare"
+        >
+          <i class="fa-solid fa-arrow-right"></i>
+          {{ $t('compare.compareBtn') }}
+        </button>
+      </div>
+    </Transition>
+
   </div>
 </template>
 
@@ -323,6 +407,7 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars.js'
+import { useCompareStore } from '@/stores/compare.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import CarCard from '@/components/ui/CarCard.vue'
@@ -333,6 +418,7 @@ import ContactModal from '@/components/ui/ContactModal.vue'
 const { t } = useI18n()
 const router = useRouter()
 const carsStore = useCarsStore()
+const compareStore = useCompareStore()
 const currentYear = new Date().getFullYear()
 
 const localFilters = reactive({ ...carsStore.filters })
@@ -407,6 +493,12 @@ function removeFilter(key) {
 
 function openCarDetail(car) {
   router.push({ name: 'car-detail', params: { id: car.id } })
+}
+
+function goToCompare() {
+  if (compareStore.canCompare) {
+    router.push({ name: 'compare' })
+  }
 }
 
 // ── Static data ──────────────────────────────────────────
@@ -1363,6 +1455,318 @@ onUnmounted(() => {
 @media (max-width: 640px) {
   .inv-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DESKTOP COMPARE BAR
+   ══════════════════════════════════════════════════════ */
+.cmp-bar {
+  display: none; /* shown on ≥769px via media query below */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 580;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.10);
+  padding: 0.75rem 1.5rem;
+}
+
+.cmp-bar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.cmp-bar-cars {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.cmp-bar-car {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cmp-bar-car-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.cmp-bar-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.cmp-bar-remove:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.cmp-bar-sep {
+  font-size: 0.75rem;
+  color: var(--border-color);
+  padding: 0 0.4rem;
+  user-select: none;
+}
+
+.cmp-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.cmp-bar-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cmp-bar-clear:hover {
+  background: var(--bg-secondary);
+  color: var(--danger);
+}
+
+.cmp-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.cmp-bar-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.cmp-bar-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Compare bar slide transition */
+.compare-bar-slide-enter-active,
+.compare-bar-slide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+.compare-bar-slide-enter-from,
+.compare-bar-slide-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+/* Show desktop compare bar on large screens */
+@media (min-width: 769px) {
+  .cmp-bar {
+    display: block;
+  }
+
+  /* Push page content up so bar doesn't cover last card */
+  .inv-results {
+    padding-bottom: 5.5rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE COMPARE CARD
+   ══════════════════════════════════════════════════════ */
+.cmp-mobile-card {
+  display: none; /* shown on ≤768px via media query */
+  position: fixed;
+  bottom: 5.5rem; /* above the floating filter/sort pill */
+  right: 1rem;
+  z-index: 589;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  width: 210px;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Card header ──────────────────────────────────────── */
+.cmp-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  background: var(--accent);
+  gap: 0.4rem;
+}
+
+.cmp-mobile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.cmp-mobile-label i {
+  font-size: 0.65rem;
+}
+
+.cmp-mobile-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 99px;
+}
+
+/* ── Car list ─────────────────────────────────────────── */
+.cmp-mobile-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.cmp-mobile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cmp-mobile-row:last-child {
+  border-bottom: none;
+}
+
+.cmp-mobile-car-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.cmp-mobile-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cmp-mobile-remove:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* ── Compare CTA button ───────────────────────────────── */
+.cmp-mobile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--accent-light);
+  color: var(--accent);
+  border: none;
+  border-top: 1px solid var(--border-color);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cmp-mobile-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.cmp-mobile-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Compare card slide transition */
+.compare-card-slide-enter-active,
+.compare-card-slide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+.compare-card-slide-enter-from,
+.compare-card-slide-leave-to {
+  transform: translateY(12px) scale(0.95);
+  opacity: 0;
+}
+
+/* Show mobile compare card only on small screens */
+@media (max-width: 768px) {
+  .cmp-mobile-card {
+    display: flex;
   }
 }
 </style>

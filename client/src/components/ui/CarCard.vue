@@ -1,5 +1,5 @@
 <template>
-  <article class="car-card" @click="$emit('view', car)">
+  <article class="car-card" :class="{ 'is-comparing': compareStore.isInCompare(car.id) }" @click="$emit('view', car)">
 
     <!-- ── Image ──────────────────────────────────────────── -->
     <div class="car-card-image">
@@ -59,9 +59,21 @@
 
       <!-- Actions -->
       <div class="car-card-actions">
+        <!-- Compare button -->
+        <button
+          class="car-compare-btn"
+          :class="{ 'is-active': compareStore.isInCompare(car.id) }"
+          :disabled="!compareStore.isInCompare(car.id) && compareStore.isFull"
+          :aria-label="compareStore.isInCompare(car.id) ? $t('compare.removeFromCompare') : $t('compare.addToCompare')"
+          :title="compareStore.isInCompare(car.id) ? $t('compare.removeFromCompare') : (!compareStore.isInCompare(car.id) && compareStore.isFull ? $t('compare.maxReached', { max: compareStore.MAX_CARS }) : $t('compare.addToCompare'))"
+          @click.stop="compareStore.toggleCar(car)"
+        >
+          <i :class="compareStore.isInCompare(car.id) ? 'fa-solid fa-code-compare' : 'fa-solid fa-code-compare'"></i>
+        </button>
+
         <button class="car-view-btn" @click.stop="$emit('view', car)">
           <i class="fa-solid fa-circle-info"></i>
-          {{ $t('car.viewDetails') }}
+          <span class="car-view-btn-text">{{ $t('car.viewDetails') }}</span>
         </button>
 
         <button
@@ -91,10 +103,12 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.js'
 import { useFavoritesStore } from '@/stores/favorites.js'
+import { useCompareStore } from '@/stores/compare.js'
 
 const { locale } = useI18n()
-const authStore = useAuthStore()
-const favStore  = useFavoritesStore()
+const authStore    = useAuthStore()
+const favStore     = useFavoritesStore()
+const compareStore = useCompareStore()
 
 const props = defineProps({
   car: {
@@ -329,35 +343,39 @@ function formatMileage(km) {
 
 /* ── Actions row ────────────────────────────────────────── */
 .car-card-actions {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  display: flex;
   align-items: center;
+  gap: 0.4rem;
   margin-top: 0.25rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-color);
-}
-
-/* When no fav button (unauthenticated) stretch view btn full width */
-.car-card-actions:has(.car-view-btn:only-child) {
-  grid-template-columns: 1fr;
 }
 
 .car-view-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1rem;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 50px;
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.car-view-btn-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .car-view-btn:hover {
@@ -366,13 +384,62 @@ function formatMileage(km) {
   box-shadow: 0 4px 14px rgba(26, 86, 219, 0.3);
 }
 
+/* ── Compare button ─────────────────────────────────────── */
+.car-compare-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
+  flex-shrink: 0;
+  order: -1; /* sits left of view-details */
+}
+
+.car-compare-btn:hover:not(:disabled) {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.car-compare-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.car-compare-btn.is-active:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.car-compare-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Highlight card outline when in compare */
+.car-card.is-comparing {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
 /* Favourite action button in the footer row */
 .car-fav-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: rgba(239, 68, 68, 0.07);
   color: #ef4444;

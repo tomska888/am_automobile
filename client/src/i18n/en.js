@@ -114,6 +114,35 @@ export default {
         noResultsDesc: 'Try adjusting your search criteria.',
         loading: 'Loading cars...'
     },
+    compare: {
+        addToCompare: 'Add to compare',
+        removeFromCompare: 'Remove from compare',
+        compareBtn: 'Compare',
+        compareCars: 'Compare Cars',
+        clearAll: 'Clear all',
+        startCompare: 'Compare ({count})',
+        maxReached: 'Max {max} cars',
+        selectAtLeastTwo: 'Select at least 2 cars to compare',
+        removeCar: 'Remove from comparison',
+        backToInventory: '',
+        noDifferences: 'All values are identical',
+        differenceHighlight: 'Differences highlighted in yellow',
+        fields: {
+            price: 'Price',
+            year: 'Year',
+            mileage: 'Mileage',
+            fuelType: 'Fuel Type',
+            transmission: 'Transmission',
+            bodyType: 'Body Type',
+            power: 'Power (HP)',
+            engineSize: 'Engine (L)',
+            color: 'Color',
+            doors: 'Doors',
+            seats: 'Seats',
+            owners: 'Prev. Owners',
+            status: 'Status'
+        }
+    },
     car: {
         viewDetails: 'View Details',
         contactAbout: 'Ask About This Car',
@@ -165,7 +194,10 @@ export default {
             coupe: 'Coupe',
             cabrio: 'Convertible',
             van: 'Van',
-            pickup: 'Pickup'
+            pickup: 'Pickup',
+            wagon: 'Wagon',
+            convertible: 'Convertible',
+            other: 'Other'
         }
     },
     about: {

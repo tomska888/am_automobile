@@ -22,6 +22,12 @@ const routes = [
     meta: { title: 'Car Details — AM Automobile' }
   },
   {
+    path: '/compare',
+    name: 'compare',
+    component: () => import('@/views/CompareView.vue'),
+    meta: { title: 'Compare Cars — AM Automobile' }
+  },
+  {
     path: '/about',
     name: 'about',
     component: () => import('@/views/AboutView.vue'),

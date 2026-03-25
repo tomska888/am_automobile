@@ -114,6 +114,35 @@ export default {
         noResultsDesc: 'Pabandykite pakeisti paieškos kriterijus.',
         loading: 'Kraunami automobiliai...'
     },
+    compare: {
+        addToCompare: 'Pridėti palyginimui',
+        removeFromCompare: 'Pašalinti iš palyginimo',
+        compareBtn: 'Palyginti',
+        compareCars: 'Palyginti automobilius',
+        clearAll: 'Išvalyti viską',
+        startCompare: 'Palyginti ({count})',
+        maxReached: 'Maks. {max} auto',
+        selectAtLeastTwo: 'Pasirinkite bent 2 automobilius palyginimui',
+        removeCar: 'Pašalinti iš palyginimo',
+        backToInventory: 'Grįžti į sąrašą',
+        noDifferences: 'Visos reikšmės yra vienodos',
+        differenceHighlight: 'Skirtumai pažymėti geltona',
+        fields: {
+            price: 'Kaina',
+            year: 'Metai',
+            mileage: 'Rida',
+            fuelType: 'Kuro tipas',
+            transmission: 'Pavarų dėžė',
+            bodyType: 'Kėbulo tipas',
+            power: 'Galia (AG)',
+            engineSize: 'Variklis (L)',
+            color: 'Spalva',
+            doors: 'Durys',
+            seats: 'Vietos',
+            owners: 'Ankst. savininkai',
+            status: 'Statusas'
+        }
+    },
     car: {
         viewDetails: 'Išsamiau',
         contactAbout: 'Teirautis apie šį automobilį',
@@ -165,7 +194,10 @@ export default {
             coupe: 'Kupė',
             cabrio: 'Kabrioletas',
             van: 'Furgonas',
-            pickup: 'Pikapas'
+            pickup: 'Pikapas',
+            wagon: 'Universalas',
+            convertible: 'Kabrioletas',
+            other: 'Kita'
         }
     },
     about: {

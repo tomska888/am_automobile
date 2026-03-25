@@ -114,6 +114,35 @@ export default {
         noResultsDesc: 'Попробуйте изменить критерии поиска.',
         loading: 'Загрузка автомобилей...'
     },
+    compare: {
+        addToCompare: 'Добавить к сравнению',
+        removeFromCompare: 'Убрать из сравнения',
+        compareBtn: 'Сравнить',
+        compareCars: 'Сравнить автомобили',
+        clearAll: 'Очистить всё',
+        startCompare: 'Сравнить ({count})',
+        maxReached: 'Макс. {max} авто',
+        selectAtLeastTwo: 'Выберите не менее 2 автомобилей для сравнения',
+        removeCar: 'Убрать из сравнения',
+        backToInventory: 'Вернуться к каталогу',
+        noDifferences: 'Все значения одинаковы',
+        differenceHighlight: 'Различия выделены жёлтым',
+        fields: {
+            price: 'Цена',
+            year: 'Год',
+            mileage: 'Пробег',
+            fuelType: 'Тип топлива',
+            transmission: 'Коробка передач',
+            bodyType: 'Тип кузова',
+            power: 'Мощность (л.с.)',
+            engineSize: 'Двигатель (л)',
+            color: 'Цвет',
+            doors: 'Двери',
+            seats: 'Места',
+            owners: 'Предыд. владельцы',
+            status: 'Статус'
+        }
+    },
     car: {
         viewDetails: 'Подробнее',
         contactAbout: 'Узнать об этом автомобиле',
@@ -165,7 +194,10 @@ export default {
             coupe: 'Купе',
             cabrio: 'Кабриолет',
             van: 'Фургон',
-            pickup: 'Пикап'
+            pickup: 'Пикап',
+            wagon: 'Универсал',
+            convertible: 'Кабриолет',
+            other: 'Другое'
         }
     },
     about: {

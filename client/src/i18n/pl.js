@@ -114,6 +114,35 @@ export default {
         noResultsDesc: 'Spróbuj zmienić kryteria wyszukiwania.',
         loading: 'Ładowanie samochodów...'
     },
+    compare: {
+        addToCompare: 'Dodaj do porównania',
+        removeFromCompare: 'Usuń z porównania',
+        compareBtn: 'Porównaj',
+        compareCars: 'Porównaj samochody',
+        clearAll: 'Wyczyść wszystko',
+        startCompare: 'Porównaj ({count})',
+        maxReached: 'Maks. {max} auta',
+        selectAtLeastTwo: 'Wybierz co najmniej 2 auta do porównania',
+        removeCar: 'Usuń z porównania',
+        backToInventory: 'Wróć do oferty',
+        noDifferences: 'Wszystkie wartości są identyczne',
+        differenceHighlight: 'Różnice zaznaczone na żółto',
+        fields: {
+            price: 'Cena',
+            year: 'Rok',
+            mileage: 'Przebieg',
+            fuelType: 'Rodzaj paliwa',
+            transmission: 'Skrzynia biegów',
+            bodyType: 'Typ nadwozia',
+            power: 'Moc (KM)',
+            engineSize: 'Silnik (L)',
+            color: 'Kolor',
+            doors: 'Drzwi',
+            seats: 'Miejsca',
+            owners: 'Poprz. właściciele',
+            status: 'Status'
+        }
+    },
     car: {
         viewDetails: 'Szczegóły',
         contactAbout: 'Zapytaj o ten samochód',
@@ -165,7 +194,10 @@ export default {
             coupe: 'Coupe',
             cabrio: 'Cabrio',
             van: 'Van',
-            pickup: 'Pickup'
+            pickup: 'Pickup',
+            wagon: 'Kombi',
+            convertible: 'Kabriolet',
+            other: 'Inne'
         }
     },
     about: {
