@@ -47,6 +47,7 @@ const containerRef = ref(null)
 const languages = [
   { code: 'pl', flag: '🇵🇱', name: 'Polski' },
   { code: 'en', flag: '🇬🇧', name: 'English' },
+  { code: 'de', flag: '🇩🇪', name: 'Deutsch' },
   { code: 'lt', flag: '🇱🇹', name: 'Lietuvių' },
   { code: 'ru', flag: '🇷🇺', name: 'Русский' }
 ]

@@ -88,14 +88,16 @@ export const useUiStore = defineStore('ui', () => {
         pl: '🇵🇱',
         en: '🇬🇧',
         lt: '🇱🇹',
-        ru: '🇷🇺'
+        ru: '🇷🇺',
+        de: '🇩🇪'
     }
 
     const languageNames = {
         pl: 'Polski',
         en: 'English',
         lt: 'Lietuvių',
-        ru: 'Русский'
+        ru: 'Русский',
+        de: 'Deutsch'
     }
 
     const currentFlag = computed(() => languageFlags[locale.value] || '🌐')

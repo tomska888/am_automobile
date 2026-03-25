@@ -167,7 +167,7 @@ router.get('/me', auth, async (req, res) => {
 // ─── PUT /api/auth/me ─────────────────────────────────────────────────────────
 
 const VALID_THEMES  = ['light', 'dark', 'system']
-const VALID_LOCALES = ['en', 'pl', 'lt', 'ru']
+const VALID_LOCALES = ['en', 'pl', 'lt', 'ru', 'de']
 
 router.put(
   '/me',

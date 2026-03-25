@@ -660,6 +660,7 @@ const themeOptions = [
 const languageOptions = [
   { code: 'en', abbr: 'EN', name: 'English' },
   { code: 'pl', abbr: 'PL', name: 'Polski' },
+  { code: 'de', abbr: 'DE', name: 'Deutsch' },
   { code: 'lt', abbr: 'LT', name: 'Lietuvių' },
   { code: 'ru', abbr: 'RU', name: 'Русский' },
 ]

@@ -76,7 +76,7 @@
                 :aria-selected="currentLangCode === lang.code"
                 @click="setLang(lang.code)"
               >
-                <span>{{ lang.flag }}</span> {{ lang.label }}
+                {{ lang.label }}
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@
                   :class="{ active: currentLangCode === lang.code }"
                   @click="setLang(lang.code)"
                 >
-                  {{ lang.flag }} {{ lang.code.toUpperCase() }}
+                  {{ lang.code.toUpperCase() }}
                 </button>
               </div>
 
@@ -201,7 +201,7 @@
               :class="{ active: currentLangCode === lang.code }"
               @click="setLang(lang.code)"
             >
-              {{ lang.flag }} {{ lang.code.toUpperCase() }}
+              {{ lang.code.toUpperCase() }}
             </button>
           </div>
           <ThemeToggle />
@@ -267,13 +267,11 @@ const languages = [
   { code: 'en', label: 'English' },
   { code: 'lt', label: 'Lietuvių' },
   { code: 'ru', label: 'Русский' },
+  { code: 'de', label: 'Deutsch' }
 ]
 
 const currentLangCode = computed(() => locale.value || 'en')
-const currentLangFlag = computed(() => {
-  const lang = languages.find(l => l.code === currentLangCode.value)
-  return lang ? lang.flag : '🇬🇧'
-})
+const currentLangFlag = computed(() => uiStore.languageFlags[currentLangCode.value] || '🌐')
 
 function setLang(code) {
   locale.value = code
