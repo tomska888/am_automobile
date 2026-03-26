@@ -76,6 +76,7 @@
               </div>
             </div>
 
+            <!-- Profile alerts -->
             <Transition name="banner-fade">
               <div v-if="profileSuccess" class="alert-banner alert-success">
                 <i class="fa-solid fa-circle-check"></i> {{ $t('profile.updateSuccess') }}
@@ -86,8 +87,20 @@
                 <i class="fa-solid fa-circle-exclamation"></i> {{ profileError }}
               </div>
             </Transition>
+            <!-- Password alerts -->
+            <Transition name="banner-fade">
+              <div v-if="passwordSuccess" class="alert-banner alert-success">
+                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.passwordSuccess') }}
+              </div>
+            </Transition>
+            <Transition name="banner-fade">
+              <div v-if="passwordError" class="alert-banner alert-error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ passwordError }}
+              </div>
+            </Transition>
 
-            <form class="profile-form" @submit.prevent="saveProfile">
+            <form class="profile-form" @submit.prevent="saveAll">
+
               <div class="form-row">
                 <div class="form-field">
                   <label class="form-label" for="prof-name">{{ $t('profile.fullName') }}</label>
@@ -100,7 +113,6 @@
                       class="form-input"
                       :placeholder="$t('profile.fullNamePlaceholder')"
                       autocomplete="name"
-                      required
                     />
                   </div>
                 </div>
@@ -115,21 +127,141 @@
                       class="form-input"
                       :placeholder="$t('profile.emailPlaceholder')"
                       autocomplete="email"
-                      required
                     />
                   </div>
                 </div>
               </div>
 
+              <!-- ── Divider: Security ───────────────────────── -->
+              <div class="section-divider">
+                <div class="divider-line"></div>
+                <div class="divider-badge">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>{{ $t('profile.security') }}</span>
+                </div>
+                <div class="divider-line"></div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label" for="pw-current">{{ $t('profile.currentPassword') }}</label>
+                  <div class="input-wrap">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input
+                      id="pw-current"
+                      v-model="passwordForm.current"
+                      :type="showCurrentPw ? 'text' : 'password'"
+                      class="form-input"
+                      :placeholder="$t('profile.currentPasswordPlaceholder')"
+                      autocomplete="current-password"
+                    />
+                    <button type="button" class="pw-toggle" @click="showCurrentPw = !showCurrentPw" :aria-label="showCurrentPw ? 'Hide' : 'Show'">
+                      <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label" for="pw-new">{{ $t('profile.newPassword') }}</label>
+                  <div class="input-wrap">
+                    <i class="fa-solid fa-lock-open input-icon"></i>
+                    <input
+                      id="pw-new"
+                      v-model="passwordForm.newPw"
+                      :type="showNewPw ? 'text' : 'password'"
+                      class="form-input"
+                      :placeholder="$t('profile.newPasswordPlaceholder')"
+                      autocomplete="new-password"
+                    />
+                    <button type="button" class="pw-toggle" @click="showNewPw = !showNewPw" :aria-label="showNewPw ? 'Hide' : 'Show'">
+                      <i :class="showNewPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                    </button>
+                  </div>
+                  <!-- Strength Meter -->
+                  <div v-if="passwordForm.newPw" class="strength-meter">
+                    <div class="strength-bar">
+                      <div class="strength-fill" :class="strengthClass" :style="{ width: strengthWidth }"></div>
+                    </div>
+                    <span class="strength-label" :class="strengthClass">{{ $t(strengthLabelKey) }}</span>
+                  </div>
+                  <ul v-if="passwordForm.newPw" class="pw-requirements">
+                    <li :class="{ met: pwReqs.length }">
+                      <i :class="pwReqs.length ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                      {{ $t('profile.req8Chars') }}
+                    </li>
+                    <li :class="{ met: pwReqs.upper }">
+                      <i :class="pwReqs.upper ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                      {{ $t('profile.reqUppercase') }}
+                    </li>
+                    <li :class="{ met: pwReqs.number }">
+                      <i :class="pwReqs.number ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
+                      {{ $t('profile.reqNumber') }}
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="pw-confirm">{{ $t('profile.confirmPassword') }}</label>
+                  <div class="input-wrap">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input
+                      id="pw-confirm"
+                      v-model="passwordForm.confirm"
+                      :type="showConfirmPw ? 'text' : 'password'"
+                      class="form-input"
+                      :placeholder="$t('profile.confirmPasswordPlaceholder')"
+                      autocomplete="new-password"
+                    />
+                    <button type="button" class="pw-toggle" @click="showConfirmPw = !showConfirmPw" :aria-label="showConfirmPw ? 'Hide' : 'Show'">
+                      <i :class="showConfirmPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                    </button>
+                  </div>
+                  <p v-if="passwordForm.confirm && passwordForm.newPw !== passwordForm.confirm" class="field-error">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {{ $t('profile.passwordMismatch') }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- ── Divider ─────────────────────────────────── -->
+              <div class="section-divider">
+                <div class="divider-line"></div>
+                <div class="divider-badge divider-badge--session">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>{{ $t('profile.signOut') }}</span>
+                </div>
+                <div class="divider-line"></div>
+              </div>
+
+              <!-- ── Section: Session ────────────────────────── -->
+              <div class="session-card">
+                <div class="session-card-info">
+                  <div class="session-card-icon">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                  </div>
+                  <div>
+                    <h3 class="session-card-title">{{ $t('profile.signOut') }}</h3>
+                    <p class="session-card-desc">{{ $t('profile.signOutDesc') }}</p>
+                  </div>
+                </div>
+                <button type="button" class="btn-danger" @click="handleLogout">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  {{ $t('nav.logout') }}
+                </button>
+              </div>
+
+              <!-- ── Shared Actions ──────────────────────────── -->
               <div class="form-actions">
-                <button type="button" class="btn-secondary" @click="resetProfileForm">
+                <button type="button" class="btn-secondary" :disabled="!isDirty || saveAllLoading" @click="resetAll">
                   <i class="fa-solid fa-rotate-left"></i>
                   {{ $t('common.cancel') }}
                 </button>
-                <button type="submit" class="btn-primary" :disabled="profileLoading">
-                  <i v-if="profileLoading" class="fa-solid fa-spinner fa-spin"></i>
+                <button type="submit" class="btn-primary" :disabled="!isDirty || saveAllLoading">
+                  <i v-if="saveAllLoading" class="fa-solid fa-spinner fa-spin"></i>
                   <i v-else class="fa-solid fa-floppy-disk"></i>
-                  {{ profileLoading ? $t('common.saving') : $t('common.save') }}
+                  {{ saveAllLoading ? $t('common.saving') : $t('common.save') }}
                 </button>
               </div>
             </form>
@@ -314,152 +446,6 @@
             </div>
           </div>
 
-          <!-- ── Security Tab ──────────────────────────────────── -->
-          <div v-else-if="activeTab === 'security'" key="security" class="profile-card">
-            <div class="profile-card-header">
-              <div class="card-header-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
-                <i class="fa-solid fa-shield-halved"></i>
-              </div>
-              <div>
-                <h2>{{ $t('profile.security') }}</h2>
-                <p>{{ $t('profile.securityDesc') }}</p>
-              </div>
-            </div>
-
-            <Transition name="banner-fade">
-              <div v-if="passwordSuccess" class="alert-banner alert-success">
-                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.passwordSuccess') }}
-              </div>
-            </Transition>
-            <Transition name="banner-fade">
-              <div v-if="passwordError" class="alert-banner alert-error">
-                <i class="fa-solid fa-circle-exclamation"></i> {{ passwordError }}
-              </div>
-            </Transition>
-
-            <form class="profile-form" @submit.prevent="savePassword">
-              <div class="form-field">
-                <label class="form-label" for="pw-current">{{ $t('profile.currentPassword') }}</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-lock input-icon"></i>
-                  <input
-                    id="pw-current"
-                    v-model="passwordForm.current"
-                    :type="showCurrentPw ? 'text' : 'password'"
-                    class="form-input"
-                    :placeholder="$t('profile.currentPasswordPlaceholder')"
-                    autocomplete="current-password"
-                    required
-                  />
-                  <button type="button" class="pw-toggle" @click="showCurrentPw = !showCurrentPw" :aria-label="showCurrentPw ? 'Hide' : 'Show'">
-                    <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="pw-new">{{ $t('profile.newPassword') }}</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-lock-open input-icon"></i>
-                  <input
-                    id="pw-new"
-                    v-model="passwordForm.newPw"
-                    :type="showNewPw ? 'text' : 'password'"
-                    class="form-input"
-                    :placeholder="$t('profile.newPasswordPlaceholder')"
-                    autocomplete="new-password"
-                    required
-                  />
-                  <button type="button" class="pw-toggle" @click="showNewPw = !showNewPw" :aria-label="showNewPw ? 'Hide' : 'Show'">
-                    <i :class="showNewPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                  </button>
-                </div>
-                <!-- Strength Meter -->
-                <div v-if="passwordForm.newPw" class="strength-meter">
-                  <div class="strength-bar">
-                    <div class="strength-fill" :class="strengthClass" :style="{ width: strengthWidth }"></div>
-                  </div>
-                  <span class="strength-label" :class="strengthClass">{{ $t(strengthLabelKey) }}</span>
-                </div>
-                <ul v-if="passwordForm.newPw" class="pw-requirements">
-                  <li :class="{ met: pwReqs.length }">
-                    <i :class="pwReqs.length ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
-                    {{ $t('profile.req8Chars') }}
-                  </li>
-                  <li :class="{ met: pwReqs.upper }">
-                    <i :class="pwReqs.upper ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
-                    {{ $t('profile.reqUppercase') }}
-                  </li>
-                  <li :class="{ met: pwReqs.number }">
-                    <i :class="pwReqs.number ? 'fa-solid fa-check' : 'fa-solid fa-xmark'"></i>
-                    {{ $t('profile.reqNumber') }}
-                  </li>
-                </ul>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="pw-confirm">{{ $t('profile.confirmPassword') }}</label>
-                <div class="input-wrap">
-                  <i class="fa-solid fa-lock input-icon"></i>
-                  <input
-                    id="pw-confirm"
-                    v-model="passwordForm.confirm"
-                    :type="showConfirmPw ? 'text' : 'password'"
-                    class="form-input"
-                    :placeholder="$t('profile.confirmPasswordPlaceholder')"
-                    autocomplete="new-password"
-                    required
-                  />
-                  <button type="button" class="pw-toggle" @click="showConfirmPw = !showConfirmPw" :aria-label="showConfirmPw ? 'Hide' : 'Show'">
-                    <i :class="showConfirmPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                  </button>
-                </div>
-                <p v-if="passwordForm.confirm && passwordForm.newPw !== passwordForm.confirm" class="field-error">
-                  <i class="fa-solid fa-triangle-exclamation"></i>
-                  {{ $t('profile.passwordMismatch') }}
-                </p>
-              </div>
-
-              <div class="form-actions">
-                <button type="button" class="btn-secondary" @click="resetPasswordForm">
-                  <i class="fa-solid fa-rotate-left"></i>
-                  {{ $t('common.cancel') }}
-                </button>
-                <button type="submit" class="btn-primary" :disabled="passwordLoading || !canSavePassword">
-                  <i v-if="passwordLoading" class="fa-solid fa-spinner fa-spin"></i>
-                  <i v-else class="fa-solid fa-key"></i>
-                  {{ passwordLoading ? $t('common.saving') : $t('profile.changePassword') }}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- ── Danger Zone Tab ───────────────────────────────── -->
-          <div v-else-if="activeTab === 'danger'" key="danger" class="profile-card">
-            <div class="profile-card-header">
-              <div class="card-header-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-              </div>
-              <div>
-                <h2>{{ $t('profile.dangerZone') }}</h2>
-                <p>{{ $t('profile.dangerZoneDesc') }}</p>
-              </div>
-            </div>
-
-            <div class="danger-zone-section">
-              <div class="danger-item">
-                <div class="danger-item-info">
-                  <h3><i class="fa-solid fa-right-from-bracket"></i> {{ $t('profile.signOut') }}</h3>
-                  <p>{{ $t('profile.signOutDesc') }}</p>
-                </div>
-                <button class="btn-danger" @click="handleLogout">
-                  <i class="fa-solid fa-right-from-bracket"></i>
-                  {{ $t('nav.logout') }}
-                </button>
-              </div>
-            </div>
-          </div>
-
         </Transition>
       </main>
     </div>
@@ -486,11 +472,9 @@ const favStore = useFavoritesStore()
 
 // ── Tabs ──────────────────────────────────────────────────────────────
 const tabs = [
-  { id: 'edit',      icon: 'fa-solid fa-user-pen',             label: 'profile.editProfile' },
-  { id: 'favorites', icon: 'fa-solid fa-heart',                 label: 'profile.myFavorites' },
-  { id: 'settings',  icon: 'fa-solid fa-sliders',               label: 'profile.settings' },
-  { id: 'security',  icon: 'fa-solid fa-shield-halved',         label: 'profile.security' },
-  { id: 'danger',    icon: 'fa-solid fa-triangle-exclamation',  label: 'profile.dangerZone' },
+  { id: 'edit',      icon: 'fa-solid fa-user-pen',  label: 'profile.editProfile' },
+  { id: 'favorites', icon: 'fa-solid fa-heart',      label: 'profile.myFavorites' },
+  { id: 'settings',  icon: 'fa-solid fa-sliders',    label: 'profile.settings' },
 ]
 const activeTab = ref('edit')
 
@@ -575,6 +559,45 @@ const passwordError = ref('')
 const showCurrentPw = ref(false)
 const showNewPw = ref(false)
 const showConfirmPw = ref(false)
+
+// ── Combined Save / Reset ──────────────────────────────────────────────
+const saveAllLoading = computed(() => profileLoading.value || passwordLoading.value)
+
+// Dirty tracking — true when any field differs from the persisted value
+const isDirty = computed(() => {
+  const profileChanged =
+    profileForm.value.name  !== (authStore.user?.name  || '') ||
+    profileForm.value.email !== (authStore.user?.email || '')
+  const passwordTouched =
+    !!passwordForm.value.current ||
+    !!passwordForm.value.newPw   ||
+    !!passwordForm.value.confirm
+  return profileChanged || passwordTouched
+})
+
+function resetAll() {
+  resetProfileForm()
+  resetPasswordForm()
+}
+
+async function saveAll() {
+  // Always save profile info
+  await saveProfile()
+
+  // Only attempt password change when the user has filled in any password field
+  const hasPasswordData = passwordForm.value.current || passwordForm.value.newPw || passwordForm.value.confirm
+  if (hasPasswordData) {
+    if (passwordForm.value.newPw !== passwordForm.value.confirm) {
+      passwordError.value = t('profile.passwordMismatch')
+      return
+    }
+    if (!canSavePassword.value) {
+      passwordError.value = t('profile.passwordError')
+      return
+    }
+    await savePassword()
+  }
+}
 
 const pwReqs = computed(() => ({
   length: passwordForm.value.newPw.length >= 8,
@@ -1494,38 +1517,111 @@ onMounted(async () => {
   transform: none;
 }
 
-/* ── Danger Zone ──────────────────────────────────────────────────── */
-.danger-zone-section {
-  padding: 1.75rem 2rem;
+/* ── Section Divider ──────────────────────────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0.25rem 0;
 }
 
-.danger-item {
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--border-color) 30%,
+    var(--border-color) 70%,
+    transparent
+  );
+}
+
+.divider-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 50px;
+  border: 1.5px solid rgba(16,185,129,0.25);
+  background: rgba(16,185,129,0.07);
+  color: #10b981;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.divider-badge--session {
+  border-color: rgba(239,68,68,0.2);
+  background: rgba(239,68,68,0.06);
+  color: #ef4444;
+}
+
+/* ── Edit-section Label ───────────────────────────────────────────── */
+.edit-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: -0.25rem;
+}
+
+.edit-section-label i {
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+/* ── Session Card (inside Edit tab) ──────────────────────────────── */
+.session-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 1.25rem 1.5rem;
-  border: 1.5px solid rgba(239,68,68,0.2);
+  padding: 1.1rem 1.4rem;
+  border: 1.5px solid rgba(239,68,68,0.18);
   border-radius: 14px;
   background: rgba(239,68,68,0.03);
 }
 
-.danger-item-info h3 {
+.session-card-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.3rem;
+  gap: 0.85rem;
+  min-width: 0;
 }
 
-.danger-item-info h3 i { color: #ef4444; }
+.session-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(239,68,68,0.09);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
 
-.danger-item-info p {
-  font-size: 0.82rem;
+.session-card-title {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  margin: 0 0 0.2rem;
+}
+
+.session-card-desc {
+  font-size: 0.8rem;
   color: var(--text-secondary);
   margin: 0;
+  line-height: 1.4;
 }
 
 .btn-danger {
@@ -1846,7 +1942,12 @@ onMounted(async () => {
 
   .profile-card-header { padding: 1.25rem 1.25rem 1rem; }
   .profile-form { padding: 1.25rem; }
-  .danger-zone-section { padding: 1.25rem; }
+
+  .session-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 
   .fav-grid {
     grid-template-columns: 1fr;
@@ -1862,7 +1963,8 @@ onMounted(async () => {
   .form-actions { flex-direction: column; }
   .form-actions .btn-secondary,
   .form-actions .btn-primary { width: 100%; justify-content: center; }
-  .danger-item { flex-direction: column; align-items: flex-start; }
+  .session-card { padding: 1rem; }
+  .btn-danger { width: 100%; justify-content: center; }
   .settings-theme-grid { grid-template-columns: repeat(3, 1fr); }
   .settings-lang-grid  { grid-template-columns: 1fr 1fr; }
 }

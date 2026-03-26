@@ -496,7 +496,7 @@ export default {
     },
     profile: {
         nav: 'Profile navigation',
-        editProfile: 'Edit Profile',
+        editProfile: 'Profile',
         editProfileSub: 'Update your name and email address',
         security: 'Security',
         securitySub: 'Change your password to keep your account secure',
