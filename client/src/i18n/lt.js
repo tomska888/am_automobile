@@ -125,6 +125,12 @@ export default {
         selectAtLeastTwo: 'Pasirinkite bent 2 automobilius palyginimui',
         removeCar: 'Pašalinti iš palyginimo',
         backToInventory: 'Grįžti į sąrašą',
+        saveComparison: 'Išsaugoti palyginimą',
+        saveComparisonSignIn: 'Prisijunkite norėdami išsaugoti',
+        save: 'Išsaugoti',
+        saved: 'Išsaugota',
+        savedSuccessToast: 'Palyginimas išsaugotas jūsų profilyje.',
+        viewSaved: 'Peržiūrėti išsaugotus',
         noDifferences: 'Visos reikšmės yra vienodos',
         differenceHighlight: 'Skirtumai pažymėti geltona',
         fields: {
@@ -568,6 +574,14 @@ export default {
         settingsLanguage: 'Kalba',
         settingsLanguageDesc: 'Pasirinkite kalbą, kuria norite matyti svetainę.',
         settingsSaved: 'Nustatymai sėkmingai išsaugoti.',
-        settingsSaveError: 'Nepavyko išsaugoti nustatymų. Bandykite dar kartą.'
+        settingsSaveError: 'Nepavyko išsaugoti nustatymų. Bandykite dar kartą.',
+        myComparisons: 'Palyginimai',
+        myComparisonsDesc: 'Išsaugoti automobilių palyginimai — atidarykite bet kurį palyginimą vienu paspaudimu.',
+        noComparisons: 'Nėra išsaugotų palyginimų',
+        noComparisonsDesc: 'Eikite į palyginimo puslapį ir spustelėkite „Išsaugoti palyginimą", kad išsaugotumėte pirmąjį palyginimą.',
+        openComparison: 'Atidaryti',
+        deleteComparison: 'Ištrinti palyginimą',
+        carUnavailable: 'Šis automobilis nebėra prieinamas',
+        someCarsSoldNotice: 'Vienas ar daugiau automobilių šiame palyginime nebėra prieinami.'
     }
 }

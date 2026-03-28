@@ -14,7 +14,43 @@
             <i class="fa-solid fa-code-compare"></i>
             {{ $t('compare.compareCars') }}
           </h1>
+
+        <!-- Save comparison button (auth-gated, only when ≥2 cars) -->
+        <button
+          v-if="authStore.isAuthenticated && compareStore.count >= 2"
+          class="cmpv-save-btn"
+          :class="{ 'is-saved': justSaved }"
+          :disabled="justSaved"
+          :aria-label="$t('compare.saveComparison')"
+          @click="handleSave"
+        >
+          <i :class="justSaved ? 'fa-solid fa-check' : 'fa-solid fa-bookmark'"></i>
+          <span>{{ justSaved ? $t('compare.saved') : $t('compare.saveComparison') }}</span>
+        </button>
+
+        <!-- Prompt to sign-in if not authenticated -->
+        <RouterLink
+          v-else-if="!authStore.isAuthenticated && compareStore.count >= 2"
+          :to="{ name: 'login' }"
+          class="cmpv-save-btn cmpv-save-btn--ghost"
+          :aria-label="$t('compare.saveComparisonSignIn')"
+        >
+          <i class="fa-solid fa-bookmark"></i>
+          <span class="cmpv-save-text-desktop">{{ $t('compare.saveComparisonSignIn') }}</span>
+          <span class="cmpv-save-text-mobile">{{ $t('compare.save') }}</span>
+        </RouterLink>
       </div>
+
+      <!-- ── SAVE SUCCESS TOAST ─────────────────────────── -->
+      <Transition name="toast-fade">
+        <div v-if="justSaved" class="cmpv-toast">
+          <i class="fa-solid fa-circle-check"></i>
+          {{ $t('compare.savedSuccessToast') }}
+          <RouterLink :to="{ name: 'profile' }" class="cmpv-toast-link">
+            {{ $t('compare.viewSaved') }}
+          </RouterLink>
+        </div>
+      </Transition>
 
       <!-- ── EMPTY STATE ────────────────────────────────── -->
       <div v-if="compareStore.count === 0" class="cmpv-empty">
@@ -45,10 +81,14 @@
               <!-- Car image -->
               <div class="cmpv-car-img-wrap">
                 <img
-                  :src="car.image_url || '/assets/img/car-placeholder.jpg'"
+                  v-if="car.image_url"
+                  :src="car.image_url"
                   :alt="`${car.make} ${car.model}`"
                   class="cmpv-car-img"
                 />
+                <div v-else class="cmpv-car-img-placeholder">
+                  <i class="fa-solid fa-car"></i>
+                </div>
               </div>
 
               <!-- Car name + inline action buttons -->
@@ -132,7 +172,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCompareStore } from '@/stores/compare.js'
@@ -156,6 +196,19 @@ watch(
     }
   }
 )
+
+// ── Save comparison ───────────────────────────────────────
+const justSaved = ref(false)
+let saveTimer = null
+
+function handleSave() {
+  const result = compareStore.saveComparison()
+  if (result.success) {
+    justSaved.value = true
+    clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => { justSaved.value = false }, 4000)
+  }
+}
 
 // ── Field definitions ─────────────────────────────────────
 // bestFn: 'max' = higher is better, 'min' = lower is better
@@ -263,7 +316,6 @@ function isWorst(field, car) {
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 2rem;
-  /* Never wrap — back and clear stay on same row as title */
   flex-wrap: nowrap;
 }
 
@@ -298,7 +350,6 @@ function isWorst(field, car) {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  /* Allow title to shrink but stay centred */
   flex: 1;
   justify-content: center;
   text-align: center;
@@ -307,6 +358,98 @@ function isWorst(field, car) {
 
 .cmpv-title i { color: var(--accent); }
 
+/* ── SAVE BUTTON ─────────────────────────────────────────── */
+.cmpv-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.45rem 1rem;
+  border-radius: 50px;
+  border: 1.5px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.cmpv-save-btn:hover:not(:disabled) {
+  background: var(--accent-hover, #1648c0);
+  border-color: var(--accent-hover, #1648c0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(26,86,219,0.3);
+}
+
+.cmpv-save-btn.is-saved,
+.cmpv-save-btn:disabled {
+  background: #10b981;
+  border-color: #10b981;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.cmpv-save-btn--ghost {
+  background: var(--bg-primary);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.cmpv-save-btn--ghost:hover {
+  background: var(--accent-light);
+}
+
+/* Show short label on mobile, full label on desktop */
+.cmpv-save-text-mobile { display: none; }
+.cmpv-save-text-desktop { display: inline; }
+
+/* ── SAVE TOAST ──────────────────────────────────────────── */
+.cmpv-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+  background: rgba(16,185,129,0.09);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #059669;
+}
+
+.cmpv-toast i { font-size: 1rem; }
+
+.cmpv-toast-link {
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.cmpv-toast-link:hover { text-decoration: underline; }
+
+/* Toast transition */
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.25s ease, max-height 0.3s ease, margin-bottom 0.3s ease;
+  overflow: hidden;
+  max-height: 80px;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+}
 
 /* ── EMPTY STATE ────────────────────────────────────────── */
 .cmpv-empty {
@@ -363,10 +506,6 @@ function isWorst(field, car) {
 }
 
 /* ── TABLE GRID ─────────────────────────────────────────── */
-/*
-  Layout: label col (220px) + N car columns (1fr each)
-  We use CSS grid with repeat so the label col is always first.
-*/
 .cmpv-table {
   --label-w: 200px;
   display: grid;
@@ -416,6 +555,17 @@ function isWorst(field, car) {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.cmpv-car-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f0f2f5);
+  color: var(--text-muted);
+  font-size: 2.5rem;
 }
 
 .cmpv-car-meta {
@@ -636,6 +786,15 @@ function isWorst(field, car) {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* Save button: icon + short text on mobile */
+  .cmpv-save-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .cmpv-save-text-desktop { display: none; }
+  .cmpv-save-text-mobile  { display: inline; }
 
   .cmpv-table {
     --label-w: 120px;

@@ -43,6 +43,9 @@
             <span v-if="tab.id === 'favorites' && favStore.count > 0" class="nav-badge">
               {{ favStore.count }}
             </span>
+            <span v-if="tab.id === 'comparisons' && compareStore.savedCount > 0" class="nav-badge nav-badge--blue">
+              {{ compareStore.savedCount }}
+            </span>
           </button>
         </nav>
 
@@ -153,7 +156,7 @@
                       :type="showCurrentPw ? 'text' : 'password'"
                       class="form-input"
                       :placeholder="$t('profile.currentPasswordPlaceholder')"
-                      autocomplete="current-password"
+                      autocomplete="off"
                     />
                     <button type="button" class="pw-toggle" @click="showCurrentPw = !showCurrentPw" :aria-label="showCurrentPw ? 'Hide' : 'Show'">
                       <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
@@ -309,10 +312,14 @@
               >
                 <div class="fav-car-image" @click="goToCar(car.id)">
                   <img
-                    :src="car.image_url || '/assets/img/car-placeholder.jpg'"
+                    v-if="car.image_url"
+                    :src="car.image_url"
                     :alt="`${car.make} ${car.model}`"
                     loading="lazy"
                   />
+                  <div v-else class="fav-car-img-placeholder">
+                    <i class="fa-solid fa-car"></i>
+                  </div>
                   <div v-if="car.status !== 'available'" class="fav-status-overlay">
                     <span class="fav-status-badge" :class="`badge-${car.status}`">
                       {{ $t(`car.status.${car.status}`) }}
@@ -362,6 +369,107 @@
                 </div>
               </article>
             </div>
+          </div>
+
+          <!-- ── Comparisons Tab ───────────────────────────────── -->
+          <div v-else-if="activeTab === 'comparisons'" key="comparisons" class="profile-card">
+            <div class="profile-card-header">
+              <div class="card-header-icon" style="background: rgba(26,86,219,0.1); color: #1a56db;">
+                <i class="fa-solid fa-code-compare"></i>
+              </div>
+              <div>
+                <h2>{{ $t('profile.myComparisons') }}</h2>
+                <p>{{ $t('profile.myComparisonsDesc') }}</p>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div v-if="compareStore.savedCount === 0" class="fav-empty">
+              <div class="fav-empty-icon" style="background: rgba(26,86,219,0.08); color: #1a56db;">
+                <i class="fa-solid fa-code-compare"></i>
+              </div>
+              <h3>{{ $t('profile.noComparisons') }}</h3>
+              <p>{{ $t('profile.noComparisonsDesc') }}</p>
+              <router-link :to="{ name: 'inventory' }" class="btn-primary">
+                <i class="fa-solid fa-car"></i>
+                {{ $t('profile.browseCars') }}
+              </router-link>
+            </div>
+
+            <!-- Comparisons list -->
+            <ul v-else class="cmp-list">
+              <li
+                v-for="saved in compareStore.savedComparisons"
+                :key="saved.id"
+                class="cmp-item"
+              >
+                <!-- Left: info + car thumbnails -->
+                <div class="cmp-item-body">
+                  <div class="cmp-item-meta">
+                    <span class="cmp-item-label">{{ saved.label }}</span>
+                    <span class="cmp-item-date">
+                      <i class="fa-regular fa-clock"></i>
+                      {{ formatSavedDate(saved.savedAt) }}
+                    </span>
+                  </div>
+
+                  <!-- Car thumbnails row -->
+                  <div class="cmp-thumbs">
+                    <div
+                      v-for="car in saved.cars"
+                      :key="car.id"
+                      class="cmp-thumb"
+                      :class="{ 'is-unavailable': isCarUnavailable(car) }"
+                      :title="isCarUnavailable(car) ? $t('profile.carUnavailable') : `${car.make} ${car.model}`"
+                    >
+                      <img
+                        v-if="car.image_url"
+                        :src="car.image_url"
+                        :alt="`${car.make} ${car.model}`"
+                        loading="lazy"
+                      />
+                      <div v-else class="cmp-thumb-placeholder">
+                        <i class="fa-solid fa-car"></i>
+                      </div>
+                      <div class="cmp-thumb-name">
+                        <span>{{ car.make }} {{ car.model }}</span>
+                        <span v-if="isCarUnavailable(car)" class="cmp-unavail-badge">
+                          {{ $t(`car.status.${car.status}`) }}
+                        </span>
+                      </div>
+                      <!-- Greyed overlay for unavailable cars -->
+                      <div v-if="isCarUnavailable(car)" class="cmp-thumb-overlay">
+                        <i class="fa-solid fa-ban"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Unavailability notice -->
+                  <p v-if="hasUnavailableCars(saved)" class="cmp-unavail-notice">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {{ $t('profile.someCarsSoldNotice') }}
+                  </p>
+                </div>
+
+                <!-- Right: actions -->
+                <div class="cmp-item-actions">
+                  <button
+                    class="btn-primary cmp-open-btn"
+                    @click="openSavedComparison(saved)"
+                  >
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    {{ $t('profile.openComparison') }}
+                  </button>
+                  <button
+                    class="cmp-delete-btn"
+                    :aria-label="$t('profile.deleteComparison')"
+                    @click="compareStore.deleteSavedComparison(saved.id)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </li>
+            </ul>
           </div>
 
           <!-- ── Settings Tab ─────────────────────────────────── -->
@@ -461,6 +569,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.js'
 import { useUiStore } from '@/stores/ui.js'
 import { useFavoritesStore } from '@/stores/favorites.js'
+import { useCompareStore } from '@/stores/compare.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 
@@ -469,12 +578,14 @@ const router = useRouter()
 const authStore = useAuthStore()
 const uiStore = useUiStore()
 const favStore = useFavoritesStore()
+const compareStore = useCompareStore()
 
 // ── Tabs ──────────────────────────────────────────────────────────────
 const tabs = [
-  { id: 'edit',      icon: 'fa-solid fa-user-pen',  label: 'profile.editProfile' },
-  { id: 'favorites', icon: 'fa-solid fa-heart',      label: 'profile.myFavorites' },
-  { id: 'settings',  icon: 'fa-solid fa-sliders',    label: 'profile.settings' },
+  { id: 'edit',        icon: 'fa-solid fa-user-pen',    label: 'profile.editProfile' },
+  { id: 'favorites',   icon: 'fa-solid fa-heart',        label: 'profile.myFavorites' },
+  { id: 'comparisons', icon: 'fa-solid fa-code-compare', label: 'profile.myComparisons' },
+  { id: 'settings',    icon: 'fa-solid fa-sliders',      label: 'profile.settings' },
 ]
 const activeTab = ref('edit')
 
@@ -716,6 +827,33 @@ async function saveSettings() {
   }
 }
 
+// ── Comparisons helpers ────────────────────────────────────────────────
+/**
+ * A car is considered "unavailable" if its status is not 'available'.
+ * Since we only store a snapshot, we check the status field that was
+ * captured at save time. If status is missing we treat it as available.
+ */
+function isCarUnavailable(car) {
+  return car.status && car.status !== 'available'
+}
+
+function hasUnavailableCars(saved) {
+  return saved.cars.some(c => isCarUnavailable(c))
+}
+
+function formatSavedDate(iso) {
+  if (!iso) return ''
+  return new Intl.DateTimeFormat(locale.value, {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  }).format(new Date(iso))
+}
+
+function openSavedComparison(saved) {
+  compareStore.loadSavedComparison(saved)
+  router.push({ name: 'compare' })
+}
+
 // ── Logout ─────────────────────────────────────────────────────────────
 async function handleLogout() {
   await authStore.logout()
@@ -954,6 +1092,10 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+
+.nav-badge--blue {
+  background: var(--accent);
 }
 
 /* Account Info Card */
@@ -1375,6 +1517,17 @@ onMounted(async () => {
 
 .fav-car-card:hover .fav-car-image img { transform: scale(1.06); }
 
+.fav-car-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f0f2f5);
+  color: var(--text-muted);
+  font-size: 2.5rem;
+}
+
 .fav-status-overlay {
   position: absolute;
   inset: 0;
@@ -1515,6 +1668,217 @@ onMounted(async () => {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ── Comparisons List ─────────────────────────────────────────────── */
+.cmp-list {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cmp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cmp-item:hover {
+  border-color: rgba(26,86,219,0.3);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+}
+
+.cmp-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cmp-item-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cmp-item-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cmp-item-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cmp-item-date i { font-size: 0.68rem; }
+
+/* Car thumbnails inside a saved comparison row */
+.cmp-thumbs {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.cmp-thumb {
+  position: relative;
+  width: 90px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-primary);
+  transition: border-color 0.15s;
+}
+
+.cmp-thumb img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+}
+
+.cmp-thumb-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f0f2f5);
+  color: var(--text-muted);
+  font-size: 1.4rem;
+}
+
+.cmp-thumb-name {
+  padding: 0.25rem 0.35rem 0.3rem;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.cmp-thumb-name > span:first-child {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* Unavailable styling: greyed-out column */
+.cmp-thumb.is-unavailable {
+  border-color: rgba(156,163,175,0.4);
+  opacity: 0.68;
+  filter: grayscale(60%);
+}
+
+.cmp-thumb.is-unavailable img {
+  filter: grayscale(45%);
+}
+
+.cmp-thumb.is-unavailable .cmp-thumb-name > span:first-child {
+  color: var(--text-muted);
+}
+
+/* Overlay icon on unavailable thumbnail */
+.cmp-thumb-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 4/3;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.75);
+  font-size: 1.1rem;
+}
+
+/* Small status badge inside thumbnail */
+.cmp-unavail-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ef4444;
+  line-height: 1;
+}
+
+/* Notice text below thumbs */
+.cmp-unavail-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #b45309;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  margin: 0;
+}
+
+.cmp-unavail-notice i { font-size: 0.72rem; color: #d97706; }
+
+/* Right-side actions column */
+.cmp-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.cmp-open-btn {
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.cmp-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 34px;
+  padding: 0;
+  background: rgba(239,68,68,0.06);
+  color: #ef4444;
+  border: 1.5px solid rgba(239,68,68,0.15);
+  border-radius: 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+}
+
+.cmp-delete-btn:hover {
+  background: rgba(239,68,68,0.14);
+  border-color: rgba(239,68,68,0.4);
+  transform: translateY(-1px);
 }
 
 /* ── Section Divider ──────────────────────────────────────────────── */
@@ -1956,6 +2320,33 @@ onMounted(async () => {
   }
 
   .pw-requirements { flex-direction: column; gap: 0.3rem; }
+
+  /* Comparisons responsive */
+  .cmp-list { padding: 0.75rem 1rem 1rem; gap: 0.75rem; }
+
+  .cmp-item {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .cmp-item-actions {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+
+  .cmp-open-btn {
+    flex: 1;
+  }
+
+  .cmp-delete-btn {
+    width: 38px;
+    flex-shrink: 0;
+  }
+
+  .cmp-thumb {
+    width: 75px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1967,5 +2358,6 @@ onMounted(async () => {
   .btn-danger { width: 100%; justify-content: center; }
   .settings-theme-grid { grid-template-columns: repeat(3, 1fr); }
   .settings-lang-grid  { grid-template-columns: 1fr 1fr; }
+  .cmp-thumb { width: 65px; }
 }
 </style>

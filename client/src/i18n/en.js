@@ -124,9 +124,15 @@ export default {
         maxReached: 'Max {max} cars',
         selectAtLeastTwo: 'Select at least 2 cars to compare',
         removeCar: 'Remove from comparison',
-        backToInventory: '',
+        backToInventory: 'Back to Inventory',
         noDifferences: 'All values are identical',
         differenceHighlight: 'Differences highlighted in yellow',
+        saveComparison: 'Save Comparison',
+        saveComparisonSignIn: 'Sign in to save',
+        save: 'Save',
+        saved: 'Saved!',
+        savedSuccessToast: 'Comparison saved to your profile.',
+        viewSaved: 'View saved',
         fields: {
             price: 'Price',
             year: 'Year',
@@ -568,6 +574,14 @@ export default {
         settingsLanguage: 'Language',
         settingsLanguageDesc: 'Select the language you want the site displayed in.',
         settingsSaved: 'Preferences saved successfully.',
-        settingsSaveError: 'Could not save preferences. Please try again.'
+        settingsSaveError: 'Could not save preferences. Please try again.',
+        myComparisons: 'Comparisons',
+        myComparisonsDesc: 'Saved vehicle comparisons — reopen any comparison with one click.',
+        noComparisons: 'No saved comparisons yet',
+        noComparisonsDesc: 'Go to the Compare page and click "Save Comparison" to save your first comparison here.',
+        openComparison: 'Open',
+        deleteComparison: 'Delete comparison',
+        carUnavailable: 'This car is no longer available',
+        someCarsSoldNotice: 'One or more cars in this comparison are no longer available.'
     }
 }

@@ -125,6 +125,12 @@ export default {
         selectAtLeastTwo: 'Выберите не менее 2 автомобилей для сравнения',
         removeCar: 'Убрать из сравнения',
         backToInventory: 'Вернуться к каталогу',
+        saveComparison: 'Сохранить сравнение',
+        saveComparisonSignIn: 'Войдите, чтобы сохранить',
+        save: 'Сохранить',
+        saved: 'Сохранено',
+        savedSuccessToast: 'Сравнение сохранено в вашем профиле.',
+        viewSaved: 'Посмотреть сохранённые',
         noDifferences: 'Все значения одинаковы',
         differenceHighlight: 'Различия выделены жёлтым',
         fields: {
@@ -568,6 +574,14 @@ export default {
         settingsLanguage: 'Язык',
         settingsLanguageDesc: 'Выберите язык отображения сайта.',
         settingsSaved: 'Настройки успешно сохранены.',
-        settingsSaveError: 'Не удалось сохранить настройки. Попробуйте снова.'
+        settingsSaveError: 'Не удалось сохранить настройки. Попробуйте снова.',
+        myComparisons: 'Сравнения',
+        myComparisonsDesc: 'Сохранённые сравнения автомобилей — откройте любое сравнение одним нажатием.',
+        noComparisons: 'Нет сохранённых сравнений',
+        noComparisonsDesc: 'Перейдите на страницу сравнения и нажмите «Сохранить сравнение», чтобы сохранить первое сравнение.',
+        openComparison: 'Открыть',
+        deleteComparison: 'Удалить сравнение',
+        carUnavailable: 'Этот автомобиль больше недоступен',
+        someCarsSoldNotice: 'Один или несколько автомобилей в этом сравнении больше недоступны.'
     }
 }

@@ -4,10 +4,14 @@
     <!-- ── Image ──────────────────────────────────────────── -->
     <div class="car-card-image">
       <img
-        :src="car.image_url || '/assets/img/car-placeholder.jpg'"
+        v-if="car.image_url"
+        :src="car.image_url"
         :alt="`${car.make} ${car.model}`"
         loading="lazy"
       />
+      <div v-else class="car-card-img-placeholder">
+        <i class="fa-solid fa-car"></i>
+      </div>
 
       <!-- Badge (featured / new arrival / best deal) -->
       <span v-if="car.badge" class="car-badge" :class="badgeClass">
@@ -183,6 +187,17 @@ function formatMileage(km) {
 
 .car-card:hover .car-card-image img {
   transform: scale(1.06);
+}
+
+.car-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f0f2f5);
+  color: var(--text-muted);
+  font-size: 2.5rem;
 }
 
 /* ── Badge (featured / new / deal) ──────────────────────── */

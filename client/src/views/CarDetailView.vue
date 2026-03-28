@@ -38,18 +38,25 @@
                   <i class="fa-solid fa-chevron-left"></i>
                 </button>
 
-                <div class="cd-gallery-img-wrap" @click="openLightbox(activeImageIndex)">
+                <div class="cd-gallery-img-wrap" :class="{ 'is-clickable': allImages.length > 0 }" @click="allImages.length > 0 && openLightbox(activeImageIndex)">
+                  <!-- Real image -->
                   <img
-                    :src="allImages[activeImageIndex] || '/assets/img/car-placeholder.jpg'"
+                    v-if="allImages.length > 0"
+                    :src="allImages[activeImageIndex]"
                     :alt="car.make + ' ' + car.model + ' image ' + (activeImageIndex + 1)"
                     class="cd-gallery-img"
                     @error="onImgError"
                   />
-                  <span class="cd-gallery-counter">
+                  <!-- No-image placeholder -->
+                  <div v-else class="cd-gallery-no-img">
+                    <i class="fa-solid fa-car"></i>
+                    <span>No photos available</span>
+                  </div>
+                  <span v-if="allImages.length > 0" class="cd-gallery-counter">
                     <i class="fa-solid fa-images"></i>
                     {{ activeImageIndex + 1 }} / {{ allImages.length }}
                   </span>
-                  <span class="cd-gallery-zoom-hint">
+                  <span v-if="allImages.length > 0" class="cd-gallery-zoom-hint">
                     <i class="fa-solid fa-magnifying-glass-plus"></i>
                   </span>
                 </div>
@@ -64,7 +71,7 @@
                 </button>
               </div>
 
-              <div class="cd-gallery-thumbs" role="list" aria-label="Image thumbnails">
+              <div v-if="allImages.length > 0" class="cd-gallery-thumbs" role="list" aria-label="Image thumbnails">
                 <button
                   v-for="(img, idx) in allImages"
                   :key="idx"
@@ -520,7 +527,7 @@ const allImages = computed(() => {
       if (Array.isArray(parsed)) imgs.push(...parsed)
     } catch {}
   }
-  return imgs.length ? imgs : ['/assets/img/car-placeholder.jpg']
+  return imgs
 })
 
 const netPrice = computed(() => {
@@ -868,6 +875,35 @@ async function shareListing() {
 
 .cd-gallery-img-wrap:hover .cd-gallery-img {
   transform: scale(1.02);
+}
+
+.cd-gallery-img-wrap:not(.is-clickable) {
+  cursor: default;
+}
+
+/* No-image placeholder */
+.cd-gallery-no-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: var(--bg-tertiary, #f0f2f5);
+  color: var(--text-muted, #9ca3af);
+  border-radius: inherit;
+}
+
+.cd-gallery-no-img i {
+  font-size: 3.5rem;
+  opacity: 0.5;
+}
+
+.cd-gallery-no-img span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.7;
 }
 
 /* Counter badge */

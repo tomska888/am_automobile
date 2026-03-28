@@ -125,6 +125,12 @@ export default {
         selectAtLeastTwo: 'Wybierz co najmniej 2 auta do porównania',
         removeCar: 'Usuń z porównania',
         backToInventory: 'Wróć do oferty',
+        saveComparison: 'Zapisz porównanie',
+        saveComparisonSignIn: 'Zaloguj się, aby zapisać',
+        save: 'Zapisz',
+        saved: 'Zapisano',
+        savedSuccessToast: 'Porównanie zapisane w Twoim profilu.',
+        viewSaved: 'Zobacz zapisane',
         noDifferences: 'Wszystkie wartości są identyczne',
         differenceHighlight: 'Różnice zaznaczone na żółto',
         fields: {
@@ -568,6 +574,14 @@ export default {
         settingsLanguage: 'Język',
         settingsLanguageDesc: 'Wybierz język, w którym chcesz wyświetlać witrynę.',
         settingsSaved: 'Preferencje zostały zapisane.',
-        settingsSaveError: 'Nie udało się zapisać preferencji. Spróbuj ponownie.'
+        settingsSaveError: 'Nie udało się zapisać preferencji. Spróbuj ponownie.',
+        myComparisons: 'Porównania',
+        myComparisonsDesc: 'Zapisane porównania pojazdów — otwórz dowolne porównanie jednym kliknięciem.',
+        noComparisons: 'Brak zapisanych porównań',
+        noComparisonsDesc: 'Przejdź na stronę Porównania i kliknij „Zapisz porównanie", aby zapisać pierwsze porównanie.',
+        openComparison: 'Otwórz',
+        deleteComparison: 'Usuń porównanie',
+        carUnavailable: 'Ten samochód nie jest już dostępny',
+        someCarsSoldNotice: 'Jeden lub więcej samochodów w tym porównaniu nie jest już dostępnych.'
     }
 }
