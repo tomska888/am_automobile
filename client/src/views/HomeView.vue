@@ -27,29 +27,77 @@
 
           <!-- Search Bar -->
           <div class="hero-search-bar animate-fade-in-up" role="search" aria-label="Car search" style="animation-delay: 0.3s;">
-            <div class="hero-search-field">
-              <i class="fa-solid fa-car" style="color: rgba(255,255,255,0.5); margin-right: 8px;"></i>
-              <select
-                v-model="searchMake"
+
+            <!-- Make custom dropdown -->
+            <div class="hero-cdd-wrap" :class="{ open: heroOpenDrop === 'make' }" v-hero-click-outside="() => heroCloseDrop('make')">
+              <button
+                type="button"
+                class="hero-cdd-trigger"
+                @click="heroToggleDrop('make')"
+                :aria-expanded="heroOpenDrop === 'make'"
                 aria-label="Select make"
-                style="background:transparent; border:none; color:rgba(255,255,255,0.85); outline:none; font-size:0.9375rem; flex:1;"
               >
-                <option value="" style="color:#1a1a2e;">{{ $t('home.hero.searchMake') }}</option>
-                <option v-for="make in carMakes" :key="make" :value="make" style="color:#1a1a2e;">{{ make }}</option>
-              </select>
+                <i class="fa-solid fa-car hero-cdd-icon"></i>
+                <span class="hero-cdd-value" :class="{ 'hero-cdd-placeholder': !searchMake }">
+                  {{ searchMake || $t('home.hero.searchMake') }}
+                </span>
+                <i class="fa-solid fa-chevron-down hero-cdd-arrow"></i>
+              </button>
+              <div class="hero-cdd-menu" role="listbox">
+                <button type="button" class="hero-cdd-option" :class="{ selected: searchMake === '' }" @click="heroPickDrop('make', '')">
+                  <span>{{ $t('home.hero.searchMake') }}</span>
+                  <i v-if="searchMake === ''" class="fa-solid fa-check hero-cdd-check"></i>
+                </button>
+                <button
+                  type="button"
+                  class="hero-cdd-option"
+                  v-for="make in carMakes"
+                  :key="make"
+                  :class="{ selected: searchMake === make }"
+                  @click="heroPickDrop('make', make)"
+                >
+                  <span>{{ make }}</span>
+                  <i v-if="searchMake === make" class="fa-solid fa-check hero-cdd-check"></i>
+                </button>
+              </div>
             </div>
+
             <div class="hero-search-divider"></div>
-            <div class="hero-search-field">
-              <i class="fa-solid fa-calendar" style="color: rgba(255,255,255,0.5); margin-right: 8px;"></i>
-              <select
-                v-model="searchYear"
-                aria-label="Select year range"
-                style="background:transparent; border:none; color:rgba(255,255,255,0.85); outline:none; font-size:0.9375rem; flex:1;"
+
+            <!-- Year custom dropdown -->
+            <div class="hero-cdd-wrap" :class="{ open: heroOpenDrop === 'year' }" v-hero-click-outside="() => heroCloseDrop('year')">
+              <button
+                type="button"
+                class="hero-cdd-trigger"
+                @click="heroToggleDrop('year')"
+                :aria-expanded="heroOpenDrop === 'year'"
+                aria-label="Select year"
               >
-                <option value="" style="color:#1a1a2e;">{{ $t('home.hero.searchYear') }}</option>
-                <option v-for="y in yearOptions" :key="y" :value="y" style="color:#1a1a2e;">{{ y }}</option>
-              </select>
+                <i class="fa-solid fa-calendar hero-cdd-icon"></i>
+                <span class="hero-cdd-value" :class="{ 'hero-cdd-placeholder': !searchYear }">
+                  {{ searchYear || $t('home.hero.searchYear') }}
+                </span>
+                <i class="fa-solid fa-chevron-down hero-cdd-arrow"></i>
+              </button>
+              <div class="hero-cdd-menu hero-yr-menu" role="listbox">
+                <div class="hero-yr-grid">
+                  <button
+                    type="button"
+                    class="hero-yr-btn"
+                    :class="{ 'hero-yr-selected': searchYear === y }"
+                    v-for="y in yearOptions"
+                    :key="y"
+                    @click="heroPickYear(y)"
+                  >{{ y }}</button>
+                </div>
+                <div class="hero-yr-footer" v-if="searchYear">
+                  <button class="hero-yr-clear" type="button" @click.stop="heroPickYear('')">
+                    <i class="fa-solid fa-times"></i> {{ $t('inventory.filters.reset') }}
+                  </button>
+                </div>
+              </div>
             </div>
+
             <RouterLink
               :to="{ name: 'inventory', query: searchQuery }"
               class="btn-search"
@@ -360,6 +408,40 @@ const searchQuery = computed(() => {
   return q
 })
 
+// ── Hero custom dropdown state ───────────────────────────
+const heroOpenDrop = ref(null)
+
+function heroToggleDrop(name) {
+  heroOpenDrop.value = heroOpenDrop.value === name ? null : name
+}
+
+function heroCloseDrop(name) {
+  if (heroOpenDrop.value === name) heroOpenDrop.value = null
+}
+
+function heroPickDrop(field, value) {
+  if (field === 'make') searchMake.value = value
+  heroOpenDrop.value = null
+}
+
+function heroPickYear(year) {
+  searchYear.value = year
+  heroOpenDrop.value = null
+}
+
+// ── Click-outside directive for hero dropdowns ───────────
+const vHeroClickOutside = {
+  mounted(el, binding) {
+    el._heroClickOutsideHandler = (e) => {
+      if (!el.contains(e.target)) binding.value(e)
+    }
+    document.addEventListener('pointerup', el._heroClickOutsideHandler)
+  },
+  unmounted(el) {
+    document.removeEventListener('pointerup', el._heroClickOutsideHandler)
+  }
+}
+
 // Hero title split: last 2 words get gradient
 const heroTitleMain = computed(() => {
   const title = t('home.hero.title')
@@ -556,25 +638,41 @@ onBeforeUnmount(() => {
 .hero-search-bar {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.1);
+  /* background + blur moved to ::before so backdrop-filter
+     does NOT create a stacking context that traps the dropdown panels */
+  background: transparent;
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 16px;
-  backdrop-filter: blur(16px);
-  padding: 8px 8px 8px 20px;
+  padding: 6px 8px 6px 6px;
   margin-bottom: 2.5rem;
-  max-width: 600px;
+  max-width: 620px;
   width: 100%;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  /* Establish a stacking context ABOVE the stats row */
+  z-index: 10;
 }
 
-.hero-search-field {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 150px;
+/* Frosted glass effect via pseudo-element — avoids stacking context on parent */
+.hero-search-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* All direct children need to sit above the ::before layer */
+.hero-search-bar > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-search-divider {
@@ -582,6 +680,230 @@ onBeforeUnmount(() => {
   height: 28px;
   background: rgba(255,255,255,0.2);
   flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* ── HERO CUSTOM DROPDOWN ────────────────────────────── */
+.hero-cdd-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 150px;
+  /* When open, elevate this wrap above siblings so the panel is not clipped */
+  z-index: 1;
+}
+
+.hero-cdd-wrap.open {
+  z-index: 100;
+}
+
+.hero-cdd-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.85);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  gap: 8px;
+  text-align: left;
+  transition: background 0.18s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hero-cdd-trigger:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.hero-cdd-wrap.open .hero-cdd-trigger {
+  background: rgba(255,255,255,0.12);
+}
+
+.hero-cdd-icon {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.hero-cdd-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+
+.hero-cdd-placeholder {
+  color: rgba(255,255,255,0.55) !important;
+  font-weight: 400 !important;
+}
+
+.hero-cdd-arrow {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.45);
+  flex-shrink: 0;
+  transition: transform 0.22s ease, color 0.18s ease;
+}
+
+.hero-cdd-wrap.open .hero-cdd-arrow {
+  transform: rotate(180deg);
+  color: rgba(255,255,255,0.8);
+}
+
+/* Dropdown panel */
+.hero-cdd-menu {
+  display: none;
+  position: absolute;
+  z-index: 300;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 200px;
+  background: #0d1b3e;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 2px 10px rgba(0,0,0,0.2);
+  padding: 0.35rem;
+  animation: heroCddFadeIn 0.18s ease;
+  max-height: 260px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hero-cdd-wrap.open .hero-cdd-menu {
+  display: block;
+}
+
+/* Option rows */
+.hero-cdd-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.85);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  gap: 0.5rem;
+  transition: background 0.15s;
+}
+
+.hero-cdd-option:hover {
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.hero-cdd-option.selected {
+  background: rgba(96,179,255,0.15);
+  color: #60b3ff;
+  font-weight: 600;
+}
+
+.hero-cdd-check {
+  font-size: 0.75rem;
+  color: #60b3ff;
+  flex-shrink: 0;
+}
+
+/* Scrollbar inside hero dropdown */
+.hero-cdd-menu::-webkit-scrollbar { width: 4px; }
+.hero-cdd-menu::-webkit-scrollbar-track { background: transparent; }
+.hero-cdd-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 99px; }
+
+/* Year grid inside hero dropdown */
+.hero-yr-menu {
+  min-width: 240px;
+  max-height: 280px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+
+.hero-cdd-wrap.open .hero-yr-menu {
+  display: flex;
+}
+
+.hero-yr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 0.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hero-yr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, transform 0.1s;
+  user-select: none;
+}
+
+.hero-yr-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.hero-yr-selected {
+  background: #60b3ff !important;
+  color: #0d1b3e !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(96,179,255,0.4);
+}
+
+.hero-yr-footer {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 0.4rem 0.55rem;
+}
+
+.hero-yr-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  color: rgba(255,100,100,0.85);
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.hero-yr-clear:hover {
+  background: rgba(239,68,68,0.12);
+  color: #ff6b6b;
+}
+
+@keyframes heroCddFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .btn-search {
@@ -1177,8 +1499,11 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
-  .hero-search-bar { flex-direction: column; align-items: stretch; }
+  .hero-search-bar { flex-direction: column; align-items: stretch; padding: 8px; }
   .hero-search-divider { display: none; }
+  .hero-cdd-wrap { min-width: 0; }
+  .hero-cdd-menu,
+  .hero-yr-menu { left: 0; right: 0; min-width: 0; }
   .btn-search { width: 100%; justify-content: center; }
   .hero-stats { gap: 1.5rem; }
   .hero-stat-sep { display: none; }

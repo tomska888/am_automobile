@@ -126,21 +126,157 @@
 
                 <!-- Year Range -->
                 <div class="inv-filter-group">
-                  <label class="inv-filter-label">{{ $t('inventory.filters.yearFrom') }}</label>
+                  <label class="inv-filter-label">{{ $t('inventory.filters.year') }}</label>
                   <div class="inv-range-row">
-                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearFrom')" v-model="localFilters.year_min" min="1990" :max="currentYear" />
+
+                    <!-- Year FROM picker -->
+                    <div class="yr-pick-wrap" :class="{ open: openDrop === 'year_min' }" v-click-outside="() => closeDrop('year_min')">
+                      <button type="button" class="cdd-trigger yr-trigger" @click="toggleDrop('year_min')" :aria-expanded="openDrop === 'year_min'">
+                        <span class="cdd-value" :class="{ 'yr-placeholder': !localFilters.year_min }">
+                          {{ localFilters.year_min || $t('inventory.filters.yearFrom') }}
+                        </span>
+                        <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                      </button>
+                      <div class="yr-panel" role="listbox">
+                        <div class="yr-grid">
+                          <button
+                            v-for="y in availableYears"
+                            :key="'min-' + y"
+                            type="button"
+                            class="yr-btn"
+                            :class="getYearClass(y, 'min')"
+                            @click="pickYear('year_min', y)"
+                          >{{ y }}</button>
+                        </div>
+                        <div class="yr-panel-footer" v-if="localFilters.year_min">
+                          <button class="yr-clear-btn" type="button" @click.stop="clearYear('year_min')">
+                            <i class="fa-solid fa-times"></i> {{ $t('inventory.filters.reset') }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                     <span class="inv-range-sep">—</span>
-                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.yearTo')" v-model="localFilters.year_max" min="1990" :max="currentYear" />
+
+                    <!-- Year TO picker -->
+                    <div class="yr-pick-wrap" :class="{ open: openDrop === 'year_max' }" v-click-outside="() => closeDrop('year_max')">
+                      <button type="button" class="cdd-trigger yr-trigger" @click="toggleDrop('year_max')" :aria-expanded="openDrop === 'year_max'">
+                        <span class="cdd-value" :class="{ 'yr-placeholder': !localFilters.year_max }">
+                          {{ localFilters.year_max || $t('inventory.filters.yearTo') }}
+                        </span>
+                        <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                      </button>
+                      <div class="yr-panel yr-panel-right" role="listbox">
+                        <div class="yr-grid">
+                          <button
+                            v-for="y in availableYears"
+                            :key="'max-' + y"
+                            type="button"
+                            class="yr-btn"
+                            :class="getYearClass(y, 'max')"
+                            @click="pickYear('year_max', y)"
+                          >{{ y }}</button>
+                        </div>
+                        <div class="yr-panel-footer" v-if="localFilters.year_max">
+                          <button class="yr-clear-btn" type="button" @click.stop="clearYear('year_max')">
+                            <i class="fa-solid fa-times"></i> {{ $t('inventory.filters.reset') }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
 
                 <!-- Price Range -->
                 <div class="inv-filter-group">
-                  <label class="inv-filter-label">{{ $t('inventory.filters.priceFrom') }}</label>
+                  <label class="inv-filter-label">{{ $t('inventory.filters.price') }}</label>
                   <div class="inv-range-row">
-                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceFrom')" v-model="localFilters.price_min" min="0" step="1000" />
+
+                    <!-- Price MIN picker -->
+                    <div class="yr-pick-wrap" :class="{ open: openDrop === 'price_min' }" v-click-outside="() => closeDrop('price_min')">
+                      <button type="button" class="cdd-trigger yr-trigger" @click="toggleDrop('price_min')" :aria-expanded="openDrop === 'price_min'">
+                        <span class="cdd-value" :class="{ 'yr-placeholder': !localFilters.price_min }">
+                          {{ localFilters.price_min ? formatPrice(localFilters.price_min) : $t('inventory.filters.priceFrom') }}
+                        </span>
+                        <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                      </button>
+                      <div class="yr-panel pr-panel" role="listbox">
+                        <!-- Preset tiles -->
+                        <div class="pr-grid">
+                          <button
+                            v-for="p in pricePresets"
+                            :key="'pmin-' + p.val"
+                            type="button"
+                            class="pr-btn"
+                            :class="getPriceClass(p.val, 'min')"
+                            :disabled="localFilters.price_max && p.val > Number(localFilters.price_max)"
+                            @click="pickPrice('price_min', p.val)"
+                          >{{ p.label }}</button>
+                        </div>
+                        <!-- Custom input -->
+                        <div class="pr-custom">
+                          <input
+                            type="number"
+                            class="inv-input pr-custom-input"
+                            :placeholder="$t('inventory.filters.priceCustom')"
+                            :value="localFilters.price_min"
+                            min="0"
+                            step="500"
+                            @change="pickPrice('price_min', $event.target.value ? Number($event.target.value) : '')"
+                          />
+                        </div>
+                        <div class="yr-panel-footer" v-if="localFilters.price_min">
+                          <button class="yr-clear-btn" type="button" @click.stop="pickPrice('price_min', '')">
+                            <i class="fa-solid fa-times"></i> {{ $t('inventory.filters.reset') }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                     <span class="inv-range-sep">—</span>
-                    <input type="number" class="inv-input" :placeholder="$t('inventory.filters.priceTo')" v-model="localFilters.price_max" min="0" step="1000" />
+
+                    <!-- Price MAX picker -->
+                    <div class="yr-pick-wrap" :class="{ open: openDrop === 'price_max' }" v-click-outside="() => closeDrop('price_max')">
+                      <button type="button" class="cdd-trigger yr-trigger" @click="toggleDrop('price_max')" :aria-expanded="openDrop === 'price_max'">
+                        <span class="cdd-value" :class="{ 'yr-placeholder': !localFilters.price_max }">
+                          {{ localFilters.price_max ? formatPrice(localFilters.price_max) : $t('inventory.filters.priceTo') }}
+                        </span>
+                        <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+                      </button>
+                      <div class="yr-panel yr-panel-right pr-panel" role="listbox">
+                        <!-- Preset tiles -->
+                        <div class="pr-grid">
+                          <button
+                            v-for="p in pricePresets"
+                            :key="'pmax-' + p.val"
+                            type="button"
+                            class="pr-btn"
+                            :class="getPriceClass(p.val, 'max')"
+                            :disabled="localFilters.price_min && p.val < Number(localFilters.price_min)"
+                            @click="pickPrice('price_max', p.val)"
+                          >{{ p.label }}</button>
+                        </div>
+                        <!-- Custom input -->
+                        <div class="pr-custom">
+                          <input
+                            type="number"
+                            class="inv-input pr-custom-input"
+                            :placeholder="$t('inventory.filters.priceCustom')"
+                            :value="localFilters.price_max"
+                            min="0"
+                            step="500"
+                            @change="pickPrice('price_max', $event.target.value ? Number($event.target.value) : '')"
+                          />
+                        </div>
+                        <div class="yr-panel-footer" v-if="localFilters.price_max">
+                          <button class="yr-clear-btn" type="button" @click.stop="pickPrice('price_max', '')">
+                            <i class="fa-solid fa-times"></i> {{ $t('inventory.filters.reset') }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
 
@@ -207,12 +343,6 @@
                   </div>
                 </div>
 
-                <!-- Apply -->
-                <button class="inv-apply-btn" @click="applyFilters">
-                  <i class="fa-solid fa-check"></i>
-                  {{ $t('inventory.filters.apply') }}
-                </button>
-
               </div><!-- end .inv-filter-body -->
             </div>
           </aside>
@@ -267,6 +397,22 @@
                 {{ carsStore.filters.make }}
                 <button class="inv-chip-remove" @click="removeFilter('make')">×</button>
               </span>
+              <span class="inv-chip" v-if="carsStore.filters.year_min">
+                <i class="fa-regular fa-calendar"></i> {{ $t('inventory.filters.yearFrom') }}: {{ carsStore.filters.year_min }}
+                <button class="inv-chip-remove" @click="removeFilter('year_min')">×</button>
+              </span>
+              <span class="inv-chip" v-if="carsStore.filters.year_max">
+                <i class="fa-regular fa-calendar"></i> {{ $t('inventory.filters.yearTo') }}: {{ carsStore.filters.year_max }}
+                <button class="inv-chip-remove" @click="removeFilter('year_max')">×</button>
+              </span>
+              <span class="inv-chip" v-if="carsStore.filters.price_min">
+                <i class="fa-solid fa-euro-sign"></i> {{ $t('inventory.filters.priceFrom') }}: {{ formatPrice(carsStore.filters.price_min) }}
+                <button class="inv-chip-remove" @click="removeFilter('price_min')">×</button>
+              </span>
+              <span class="inv-chip" v-if="carsStore.filters.price_max">
+                <i class="fa-solid fa-euro-sign"></i> {{ $t('inventory.filters.priceTo') }}: {{ formatPrice(carsStore.filters.price_max) }}
+                <button class="inv-chip-remove" @click="removeFilter('price_max')">×</button>
+              </span>
               <span class="inv-chip" v-if="carsStore.filters.fuel_type">
                 {{ $t(`car.fuel.${carsStore.filters.fuel_type}`) }}
                 <button class="inv-chip-remove" @click="removeFilter('fuel_type')">×</button>
@@ -274,6 +420,10 @@
               <span class="inv-chip" v-if="carsStore.filters.transmission">
                 {{ $t(`car.trans.${carsStore.filters.transmission}`) }}
                 <button class="inv-chip-remove" @click="removeFilter('transmission')">×</button>
+              </span>
+              <span class="inv-chip" v-if="carsStore.filters.body_type">
+                {{ $t(`car.body.${carsStore.filters.body_type}`) }}
+                <button class="inv-chip-remove" @click="removeFilter('body_type')">×</button>
               </span>
             </div>
 
@@ -404,7 +554,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars.js'
 import { useCompareStore } from '@/stores/compare.js'
@@ -417,6 +567,7 @@ import ContactModal from '@/components/ui/ContactModal.vue'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const carsStore = useCarsStore()
 const compareStore = useCompareStore()
 const currentYear = new Date().getFullYear()
@@ -501,6 +652,36 @@ function goToCompare() {
   }
 }
 
+// ── Year picker helpers ──────────────────────────────────
+const availableYears = computed(() => {
+  const years = []
+  for (let y = currentYear; y >= 1990; y--) years.push(y)
+  return years
+})
+
+function getYearClass(year, side) {
+  const min = localFilters.year_min ? Number(localFilters.year_min) : null
+  const max = localFilters.year_max ? Number(localFilters.year_max) : null
+  if (side === 'min' && min === year) return 'yr-btn-selected yr-btn-selected-start'
+  if (side === 'max' && max === year) return 'yr-btn-selected yr-btn-selected-end'
+  if (min && max && year > min && year < max) return 'yr-btn-in-range'
+  if (side === 'min' && max && year === max) return 'yr-btn-in-range'
+  if (side === 'max' && min && year === min) return 'yr-btn-in-range'
+  return ''
+}
+
+function pickYear(field, year) {
+  localFilters[field] = year
+  openDrop.value = null
+  applyFilters()
+}
+
+function clearYear(field) {
+  localFilters[field] = ''
+  openDrop.value = null
+  applyFilters()
+}
+
 // ── Static data ──────────────────────────────────────────
 const makes = ['Audi', 'BMW', 'Ford', 'Honda', 'Hyundai', 'Kia', 'Mercedes-Benz', 'Nissan', 'Opel', 'Renault', 'Skoda', 'Toyota', 'Volkswagen', 'Volvo']
 const fuelTypes = ['petrol', 'diesel', 'electric', 'hybrid', 'lpg']
@@ -521,7 +702,23 @@ const sortOptions = computed(() => [
 ])
 
 onMounted(() => {
-  carsStore.fetchCars()
+  // ── Apply filters from home page hero search query params ──
+  const q = route.query
+  let hasQueryFilters = false
+  if (q.make) {
+    localFilters.make = q.make
+    hasQueryFilters = true
+  }
+  // year_from maps to year_min (single year "from" selection on home page)
+  if (q.year_from) {
+    localFilters.year_min = String(q.year_from)
+    hasQueryFilters = true
+  }
+  if (hasQueryFilters) {
+    carsStore.applyFilters({ ...localFilters })
+  } else {
+    carsStore.fetchCars()
+  }
 
   // Only activate on mobile widths
   const setupObserver = () => {
@@ -557,6 +754,40 @@ onUnmounted(() => {
   if (_barObserver) _barObserver.disconnect()
   window.removeEventListener('resize', () => {})
 })
+
+// ── Price picker helpers ─────────────────────────────────
+const pricePresets = [
+  { val: 8000,  label: '€8k'  },
+  { val: 10000, label: '€10k' },
+  { val: 12000, label: '€12k' },
+  { val: 15000, label: '€15k' },
+  { val: 18000, label: '€18k' },
+  { val: 20000, label: '€20k' },
+  { val: 25000, label: '€25k' },
+  { val: 30000, label: '€30k' },
+]
+
+function formatPrice(val) {
+  if (!val && val !== 0) return ''
+  const n = Number(val)
+  if (n >= 1000) return '€' + (n / 1000).toLocaleString('en', { maximumFractionDigits: 1 }) + 'k'
+  return '€' + n.toLocaleString('en')
+}
+
+function getPriceClass(val, side) {
+  const min = localFilters.price_min ? Number(localFilters.price_min) : null
+  const max = localFilters.price_max ? Number(localFilters.price_max) : null
+  if (side === 'min' && min === val) return 'pr-btn-selected'
+  if (side === 'max' && max === val) return 'pr-btn-selected'
+  if (min && max && val > min && val < max) return 'pr-btn-in-range'
+  return ''
+}
+
+function pickPrice(field, val) {
+  localFilters[field] = val
+  openDrop.value = null
+  applyFilters()
+}
 </script>
 
 <style scoped>
@@ -969,6 +1200,208 @@ onUnmounted(() => {
   color: var(--text-muted);
   font-size: 0.85rem;
   flex-shrink: 0;
+}
+
+/* ── YEAR PICKER ────────────────────────────────────────── */
+.yr-pick-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.yr-trigger {
+  width: 100%;
+}
+
+/* Dropdown panel */
+.yr-panel {
+  display: none;
+  position: absolute;
+  z-index: 220;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 220px;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  animation: cddFadeIn 0.18s ease;
+}
+
+.yr-panel-right {
+  left: auto;
+  right: 0;
+}
+
+.yr-pick-wrap.open .yr-panel {
+  display: block;
+}
+
+/* Grid: 4 columns of year buttons */
+.yr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 0.55rem;
+  max-height: 224px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.yr-grid::-webkit-scrollbar { width: 4px; }
+.yr-grid::-webkit-scrollbar-track { background: transparent; }
+.yr-grid::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 99px; }
+
+/* Individual year button */
+.yr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, transform 0.1s;
+  user-select: none;
+}
+
+.yr-btn:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+.yr-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* In-range highlight */
+.yr-btn-in-range {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Selected (range boundary) */
+.yr-btn-selected {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* Placeholder text color in trigger */
+.yr-placeholder {
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+}
+
+/* Footer with clear link */
+.yr-panel-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 0.4rem 0.55rem;
+}
+
+.yr-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  color: var(--danger, #ef4444);
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.yr-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* ── PRICE PICKER ───────────────────────────────────────── */
+/* Wider panel — needs more room for the custom input */
+.pr-panel {
+  width: 240px;
+}
+
+/* 4-column preset grid */
+.pr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 0.55rem 0.55rem 0.3rem;
+}
+
+/* Preset tile */
+.pr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, transform 0.1s;
+  user-select: none;
+  white-space: nowrap;
+  padding: 0 2px;
+}
+
+.pr-btn:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
+.pr-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* In-range highlight */
+.pr-btn-in-range {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Selected boundary */
+.pr-btn-selected {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* Custom value input area */
+.pr-custom {
+  padding: 0.3rem 0.55rem 0.45rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.pr-custom-input {
+  font-size: 0.8rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
 }
 
 /* ── APPLY BUTTON ──────────────────────────────────── */
