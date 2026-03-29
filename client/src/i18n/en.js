@@ -284,6 +284,17 @@ export default {
             and: 'and',
             privacy: 'Privacy Policy'
         },
+        forgotPassword: {
+            title: 'Reset Password',
+            subtitle: 'Enter your email address and we\'ll send you a link to reset your password.',
+            email: 'Email Address',
+            submit: 'Send Reset Link',
+            submitting: 'Sending...',
+            successTitle: 'Check your email',
+            successMsg: 'If an account with that email exists, we\'ve sent a password reset link. Check your inbox and spam folder.',
+            backToLogin: 'Back to Sign In',
+            error: 'Something went wrong. Please try again.'
+        },
         validation: {
             required: 'This field is required',
             emailInvalid: 'Please enter a valid email address',

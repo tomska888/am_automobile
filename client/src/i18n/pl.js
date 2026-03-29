@@ -284,6 +284,17 @@ export default {
             and: 'i',
             privacy: 'Politykę prywatności'
         },
+        forgotPassword: {
+            title: 'Resetuj hasło',
+            subtitle: 'Wpisz swój adres email, a wyślemy Ci link do zresetowania hasła.',
+            email: 'Adres email',
+            submit: 'Wyślij link resetujący',
+            submitting: 'Wysyłanie...',
+            successTitle: 'Sprawdź swoją skrzynkę',
+            successMsg: 'Jeśli konto z tym adresem email istnieje, wysłaliśmy link do resetowania hasła. Sprawdź skrzynkę odbiorczą i folder spam.',
+            backToLogin: 'Wróć do logowania',
+            error: 'Coś poszło nie tak. Spróbuj ponownie.'
+        },
         validation: {
             required: 'To pole jest wymagane',
             emailInvalid: 'Podaj prawidłowy adres email',

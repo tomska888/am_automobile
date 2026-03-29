@@ -1,9 +1,11 @@
-const router = require('express').Router()
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const router  = require('express').Router()
+const bcrypt  = require('bcryptjs')
+const crypto  = require('crypto')
+const jwt     = require('jsonwebtoken')
 const { body, validationResult } = require('express-validator')
 const { pool } = require('../config/db')
-const auth = require('../middleware/auth')
+const auth    = require('../middleware/auth')
+const { sendPasswordResetEmail } = require('../config/email')
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -254,6 +256,122 @@ router.post(
     } catch (err) {
       console.error('Change password error:', err)
       res.status(500).json({ success: false, message: 'Failed to change password' })
+    }
+  }
+)
+
+// ─── POST /api/auth/forgot-password ──────────────────────────────────────────
+// Rate-limited to 5 requests per 15 min by the global authLimiter in app.js.
+// Always responds with 200 to prevent email enumeration.
+
+router.post(
+  '/forgot-password',
+  [ body('email').isEmail({ allow_utf8_local_part: false }).toLowerCase().withMessage('Valid email required') ],
+  async (req, res) => {
+    if (!handleValidation(req, res)) return
+
+    const { email } = req.body
+
+    try {
+      // Look up user — silently succeed even if not found (prevents enumeration)
+      const [rows] = await pool.query(
+        'SELECT id, name, email FROM users WHERE email = ? AND is_active = 1',
+        [email]
+      )
+
+      if (rows.length) {
+        const user = rows[0]
+
+        // Invalidate any previous unused tokens for this user
+        await pool.query(
+          'DELETE FROM password_reset_tokens WHERE user_id = ? AND used_at IS NULL',
+          [user.id]
+        )
+
+        // Generate a cryptographically secure 48-byte token
+        const rawToken  = crypto.randomBytes(48).toString('hex')
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex')
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+        await pool.query(
+          'INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+          [user.id, tokenHash, expiresAt]
+        )
+
+        const appUrl   = process.env.APP_URL || 'http://localhost:5173'
+        const resetUrl = `${appUrl}/reset-password?token=${rawToken}`
+
+        // Fire-and-forget — never leak email errors to the client
+        sendPasswordResetEmail({ to: user.email, userName: user.name, resetUrl })
+          .catch((err) => console.error('[email] Failed to send reset email:', err))
+      }
+
+      // Always return 200 OK
+      res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' })
+    } catch (err) {
+      console.error('Forgot password error:', err)
+      res.status(500).json({ success: false, message: 'Request failed' })
+    }
+  }
+)
+
+// ─── POST /api/auth/reset-password ───────────────────────────────────────────
+
+router.post(
+  '/reset-password',
+  [
+    body('token').notEmpty().withMessage('Token required'),
+    body('password')
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters')
+      .matches(/[A-Z]/)
+      .withMessage('Password must contain an uppercase letter')
+      .matches(/[0-9]/)
+      .withMessage('Password must contain a number')
+  ],
+  async (req, res) => {
+    if (!handleValidation(req, res)) return
+
+    const { token, password } = req.body
+
+    try {
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+      const [rows] = await pool.query(
+        `SELECT prt.id, prt.user_id, prt.expires_at, prt.used_at
+         FROM password_reset_tokens prt
+         WHERE prt.token_hash = ?`,
+        [tokenHash]
+      )
+
+      const record = rows[0]
+
+      if (!record) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired reset link.' })
+      }
+
+      if (record.used_at) {
+        return res.status(400).json({ success: false, message: 'This reset link has already been used.' })
+      }
+
+      if (new Date() > new Date(record.expires_at)) {
+        return res.status(400).json({ success: false, message: 'This reset link has expired. Please request a new one.' })
+      }
+
+      // Hash new password and update user
+      const passwordHash = await bcrypt.hash(password, 12)
+      await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, record.user_id])
+
+      // Mark token as used
+      await pool.query(
+        'UPDATE password_reset_tokens SET used_at = NOW() WHERE id = ?',
+        [record.id]
+      )
+
+      res.json({ success: true, message: 'Password reset successfully. You can now sign in.' })
+    } catch (err) {
+      console.error('Reset password error:', err)
+      res.status(500).json({ success: false, message: 'Password reset failed' })
     }
   }
 )

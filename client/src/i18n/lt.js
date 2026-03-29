@@ -284,6 +284,17 @@ export default {
             and: 'ir',
             privacy: 'Privatumo politika'
         },
+        forgotPassword: {
+            title: 'Atkurti slaptažodį',
+            subtitle: 'Įveskite savo el. pašto adresą ir atsiųsime nuorodą slaptažodžiui atkurti.',
+            email: 'El. pašto adresas',
+            submit: 'Siųsti nuorodą',
+            submitting: 'Siunčiama...',
+            successTitle: 'Patikrinkite el. paštą',
+            successMsg: 'Jei paskyra su šiuo el. paštu egzistuoja, išsiuntėme slaptažodžio atkūrimo nuorodą. Patikrinkite gautuosius ir šlamšto aplanką.',
+            backToLogin: 'Grįžti į prisijungimą',
+            error: 'Kažkas nutiko. Bandykite dar kartą.'
+        },
         validation: {
             required: 'Šis laukas yra privalomas',
             emailInvalid: 'Įveskite teisingą el. pašto adresą',

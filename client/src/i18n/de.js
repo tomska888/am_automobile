@@ -284,6 +284,17 @@ export default {
             and: 'und',
             privacy: 'Datenschutzrichtlinien zu'
         },
+        forgotPassword: {
+            title: 'Passwort zurücksetzen',
+            subtitle: 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen des Passworts.',
+            email: 'E-Mail-Adresse',
+            submit: 'Reset-Link senden',
+            submitting: 'Wird gesendet...',
+            successTitle: 'Überprüfen Sie Ihre E-Mails',
+            successMsg: 'Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet. Überprüfen Sie Ihren Posteingang und Spam-Ordner.',
+            backToLogin: 'Zurück zur Anmeldung',
+            error: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.'
+        },
         validation: {
             required: 'Dieses Feld ist erforderlich',
             emailInvalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',

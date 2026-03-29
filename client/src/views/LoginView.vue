@@ -72,7 +72,7 @@
           <div class="auth-field">
             <div class="auth-label-row">
               <label class="auth-label">{{ $t('auth.login.password') }}</label>
-              <a href="#" class="auth-forgot">{{ $t('auth.login.forgotPass') }}</a>
+              <button type="button" class="auth-forgot" @click="forgotOpen = true">{{ $t('auth.login.forgotPass') }}</button>
             </div>
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock auth-input-icon"></i>
@@ -136,6 +136,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Forgot Password Modal -->
+  <ForgotPasswordModal v-model="forgotOpen" />
 </template>
 
 <script setup>
@@ -143,13 +146,15 @@ import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { useUiStore } from '@/stores/ui.js'
+import ForgotPasswordModal from '@/components/ui/ForgotPasswordModal.vue'
 
 const router = useRouter()
 const route  = useRoute()
 const authStore = useAuthStore()
 const uiStore   = useUiStore()
 
-const showPass = ref(false)
+const showPass  = ref(false)
+const forgotOpen = ref(false)
 const form = reactive({ email: '', password: '' })
 
 async function handleLogin() {
@@ -402,8 +407,14 @@ async function handleLogin() {
 .auth-forgot {
   font-size: 0.8125rem;
   color: var(--accent);
-  text-decoration: none;
   font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  line-height: inherit;
 }
 .auth-forgot:hover { text-decoration: underline; }
 

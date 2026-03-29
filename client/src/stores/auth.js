@@ -168,6 +168,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function forgotPassword(email) {
+    loading.value = true
+    error.value = null
+    try {
+      await axios.post('/api/auth/forgot-password', { email })
+      return { success: true }
+    } catch (err) {
+      const resData = err.response?.data
+      const msg = resData?.message || 'Request failed'
+      error.value = msg
+      return { success: false, message: msg }
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function changePassword(currentPassword, newPassword) {
     loading.value = true
     error.value = null
@@ -190,6 +206,6 @@ export const useAuthStore = defineStore('auth', () => {
     user, token, loading, error,
     isAuthenticated, isAdmin, userName,
     login, register, logout, restoreSession, fetchMe,
-    updateProfile, savePreferences, changePassword
+    updateProfile, savePreferences, changePassword, forgotPassword
   }
 })

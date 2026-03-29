@@ -54,6 +54,12 @@ const routes = [
     meta: { title: 'Create Account — AM Automobile', guestOnly: true }
   },
   {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('@/views/ResetPasswordView.vue'),
+    meta: { title: 'Reset Password — AM Automobile', guestOnly: true }
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
