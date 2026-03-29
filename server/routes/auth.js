@@ -309,7 +309,11 @@ router.post(
       // Always return 200 OK
       res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' })
     } catch (err) {
-      console.error('Forgot password error:', err)
+      console.error('Forgot password error:', err.message || err)
+      // Surface DB errors clearly in logs (table missing, connection failed, etc.)
+      if (err.code === 'ER_NO_SUCH_TABLE') {
+        console.error('[forgot-password] The password_reset_tokens table does not exist. Run: mk/server/database/password-reset-migration.sql')
+      }
       res.status(500).json({ success: false, message: 'Request failed' })
     }
   }

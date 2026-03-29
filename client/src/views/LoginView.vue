@@ -135,10 +135,10 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Forgot Password Modal -->
-  <ForgotPasswordModal v-model="forgotOpen" />
+    <!-- Forgot Password Modal (inside root div to preserve single-root for <Transition>) -->
+    <ForgotPasswordModal v-model="forgotOpen" />
+  </div>
 </template>
 
 <script setup>

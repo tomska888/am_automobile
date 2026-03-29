@@ -14,29 +14,48 @@ let _transporter = null
 async function getTransporter() {
   if (_transporter) return _transporter
 
-  if (process.env.MAIL_HOST) {
+  // Support both SMTP_* (deployment guide) and MAIL_* (legacy) env var names
+  const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST
+  const smtpPort = process.env.SMTP_PORT || process.env.MAIL_PORT || '587'
+  const smtpUser = process.env.SMTP_USER || process.env.MAIL_USER
+  const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASS
+  const smtpFrom = process.env.SMTP_FROM || process.env.MAIL_FROM || 'noreply@amautomobile.pl'
+
+  if (smtpHost) {
     // Production / staging: real SMTP credentials from .env
     _transporter = nodemailer.createTransport({
-      host:   process.env.MAIL_HOST,
-      port:   parseInt(process.env.MAIL_PORT || '587', 10),
-      secure: process.env.MAIL_PORT === '465',   // true only for port 465
+      host:   smtpHost,
+      port:   parseInt(smtpPort, 10),
+      secure: smtpPort === '465',   // true only for port 465
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
+        user: smtpUser,
+        pass: smtpPass
       },
       tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' }
     })
+    // Store resolved from address for use in sendMail
+    _transporter._amFrom = smtpFrom
+  } else if (process.env.NODE_ENV === 'production') {
+    // Production with no MAIL_HOST — create a no-op transporter so the
+    // server doesn't crash. Emails won't be sent; a warning is logged.
+    console.warn('[email] WARNING: MAIL_HOST is not set. Password reset emails will NOT be sent.')
+    _transporter = nodemailer.createTransport({ jsonTransport: true })
   } else {
     // Development fallback: Ethereal catches emails without sending them.
     // Preview URL is printed to the console after each send.
-    const testAccount = await nodemailer.createTestAccount()
-    _transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: { user: testAccount.user, pass: testAccount.pass }
-    })
-    console.log('[email] No MAIL_HOST set — using Ethereal test account:', testAccount.user)
+    try {
+      const testAccount = await nodemailer.createTestAccount()
+      _transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: { user: testAccount.user, pass: testAccount.pass }
+      })
+      console.log('[email] No MAIL_HOST set — using Ethereal test account:', testAccount.user)
+    } catch {
+      console.warn('[email] Could not create Ethereal test account — falling back to no-op transport.')
+      _transporter = nodemailer.createTransport({ jsonTransport: true })
+    }
   }
 
   return _transporter
@@ -257,10 +276,13 @@ async function sendPasswordResetEmail({ to, userName, resetUrl }) {
   const transporter = await getTransporter()
   const expiresText = '1 hour'
 
+  const fromAddress = transporter._amFrom
+    || process.env.SMTP_FROM
+    || process.env.MAIL_FROM
+    || 'noreply@amautomobile.pl'
+
   const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM
-      ? `"AM Automobile" <${process.env.MAIL_FROM}>`
-      : '"AM Automobile" <noreply@amautomobile.pl>',
+    from: `"AM Automobile" <${fromAddress}>`,
     to,
     subject: 'Reset your AM Automobile password',
     text: buildResetEmailText({ userName, resetUrl, expiresText }),
