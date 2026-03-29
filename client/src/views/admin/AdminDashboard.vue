@@ -111,7 +111,7 @@ onMounted(async () => {
 })
 
 function formatPrice(price) {
-  return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN', maximumFractionDigits: 0 }).format(price)
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(price)
 }
 </script>
 

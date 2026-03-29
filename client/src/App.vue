@@ -73,18 +73,20 @@ function toastIcon(type) {
 </script>
 
 <style>
-/* Toast transition */
-.toast-enter-active,
+/* ── Toast transition: fade + pop, no sliding ── */
+.toast-enter-active {
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 .toast-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 .toast-enter-from {
   opacity: 0;
-  transform: translateX(100%);
+  transform: scale(0.85) translateY(12px);
 }
 .toast-leave-to {
   opacity: 0;
-  transform: translateX(100%);
+  transform: scale(0.9) translateY(6px);
 }
 
 /* Toast close button */
@@ -102,4 +104,18 @@ function toastIcon(type) {
   margin-left: auto;
 }
 .toast-close-btn:hover { opacity: 1; }
+
+/* ── Mobile: full-width, pinned to bottom ── */
+@media (max-width: 480px) {
+  .toast-container-am {
+    left: var(--space-3, 0.75rem);
+    right: var(--space-3, 0.75rem);
+    bottom: var(--space-4, 1rem);
+  }
+  .toast-am {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
+}
 </style>

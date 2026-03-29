@@ -310,6 +310,19 @@ export default {
             edit: 'Edytuj',
             delete: 'Usuń',
             deleteConfirm: 'Czy na pewno chcesz usunąć ten samochód?',
+            filters: {
+                allStatuses: 'Wszystkie statusy',
+                allFuels: 'Wszystkie paliwa',
+                allBodies: 'Wszystkie nadwozia',
+                yearFrom: 'Rok od',
+                yearTo: 'Rok do',
+                sortNewest: 'Najnowsze',
+                sortOldest: 'Najstarsze',
+                sortMakeAZ: 'Marka A–Z',
+                reset: 'Wyczyść filtry',
+                actions: 'Akcje',
+                showing: 'przefiltrowane'
+            },
             form: {
                 editingSubtitle: 'Edytujesz: {make} {model}',
                 addSubtitle: 'Wypełnij dane nowego pojazdu',

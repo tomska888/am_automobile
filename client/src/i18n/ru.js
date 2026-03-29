@@ -310,6 +310,19 @@ export default {
             edit: 'Редактировать',
             delete: 'Удалить',
             deleteConfirm: 'Вы уверены, что хотите удалить этот автомобиль?',
+            filters: {
+                allStatuses: 'Все статусы',
+                allFuels: 'Все виды топлива',
+                allBodies: 'Все типы кузова',
+                yearFrom: 'Год от',
+                yearTo: 'Год до',
+                sortNewest: 'Сначала новые',
+                sortOldest: 'Сначала старые',
+                sortMakeAZ: 'Марка А–Я',
+                reset: 'Сбросить фильтры',
+                actions: 'Действия',
+                showing: 'отфильтровано'
+            },
             form: {
                 editingSubtitle: 'Редактирование: {make} {model}',
                 addSubtitle: 'Заполните данные нового автомобиля',

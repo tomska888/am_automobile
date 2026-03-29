@@ -158,49 +158,75 @@
         <!-- Loading -->
         <LoadingSpinner v-if="carsStore.loading" />
 
-        <!-- Car Grid from API -->
-        <div v-else-if="carsStore.featuredCars?.length" class="cars-grid">
-          <div
-            v-for="(car, index) in carsStore.featuredCars.slice(0, 3)"
-            :key="car.id"
-          >
-            <div
-              class="car-card reveal"
-              :class="'reveal-delay-' + (index + 1)"
-              role="article"
-              :aria-label="car.make + ' ' + car.model"
-            >
-              <div class="car-image-area" :class="'car-bg-' + ((index % 3) + 1)">
+        <!-- Car Grid from API: 1 featured + 1 latest arrival -->
+        <div v-else-if="carsStore.featuredCars?.length || carsStore.latestCar" class="cars-grid cars-grid-2">
+
+          <!-- Featured card -->
+          <div v-if="carsStore.featuredCars[0]">
+            <div class="car-card reveal reveal-delay-1" role="article"
+              :aria-label="carsStore.featuredCars[0].make + ' ' + carsStore.featuredCars[0].model">
+              <div class="car-image-area car-bg-1">
                 <div class="car-icon-wrap">
-                  <i class="fa-solid fa-car-side" :style="{ color: carIconColors[index % 3] }"></i>
+                  <i class="fa-solid fa-car-side" style="color: #60b3ff;"></i>
                 </div>
-                <span class="car-badge" :class="index === 2 ? 'badge-deal' : index === 1 ? 'badge-new' : 'badge-featured'">
-                  {{ index === 2 ? $t('home.featured.badgeDeal') : index === 1 ? $t('home.featured.badgeNew') : $t('home.featured.badgeFeatured') }}
-                </span>
+                <span class="car-badge badge-featured">{{ $t('home.featured.badgeFeatured') }}</span>
               </div>
               <div class="car-card-body">
                 <div class="car-card-meta">
-                  <span class="car-card-name">{{ car.year }} {{ car.make }} {{ car.model }}</span>
-                  <span class="car-card-price">€{{ Number(car.price).toLocaleString() }}</span>
+                  <span class="car-card-name">{{ carsStore.featuredCars[0].make }} {{ carsStore.featuredCars[0].model }}</span>
+                  <span class="car-card-price">€{{ Number(carsStore.featuredCars[0].price).toLocaleString() }}</span>
                 </div>
                 <div class="car-features-row">
                   <div class="car-feature-chip">
-                    <i class="fa-solid fa-road"></i> {{ Number(car.mileage).toLocaleString() }} km
+                    <i class="fa-solid fa-road"></i> {{ Number(carsStore.featuredCars[0].mileage).toLocaleString() }} km
                   </div>
                   <div class="car-feature-chip">
-                    <i class="fa-solid fa-gas-pump"></i> {{ car.fuel_type }}
+                    <i class="fa-solid fa-gas-pump"></i> {{ carsStore.featuredCars[0].fuel_type }}
                   </div>
                   <div class="car-feature-chip">
-                    <i class="fa-solid fa-gears"></i> {{ car.transmission }}
-                  </div>
-                  <div class="car-feature-chip">
-                    <i class="fa-solid fa-calendar"></i> {{ car.year }}
+                    <i class="fa-solid fa-calendar"></i> {{ carsStore.featuredCars[0].year }}
                   </div>
                 </div>
                 <RouterLink
-                  :to="{ name: 'car-detail', params: { id: car.id } }"
+                  :to="{ name: 'car-detail', params: { id: carsStore.featuredCars[0].id } }"
                   class="btn-view-details"
-                  :aria-label="'View details for ' + car.make + ' ' + car.model"
+                >
+                  {{ $t('home.featured.viewDetails') }}
+                  <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+                </RouterLink>
+              </div>
+            </div>
+          </div>
+
+          <!-- Latest arrival card -->
+          <div v-if="carsStore.latestCar">
+            <div class="car-card reveal reveal-delay-2" role="article"
+              :aria-label="carsStore.latestCar.make + ' ' + carsStore.latestCar.model">
+              <div class="car-image-area car-bg-2">
+                <div class="car-icon-wrap">
+                  <i class="fa-solid fa-car-side" style="color: #a0c8ff;"></i>
+                </div>
+                <span class="car-badge badge-new">{{ $t('home.featured.badgeNew') }}</span>
+              </div>
+              <div class="car-card-body">
+                <div class="car-card-meta">
+                  <span class="car-card-name">{{ carsStore.latestCar.make }} {{ carsStore.latestCar.model }}</span>
+                  <span class="car-card-price">€{{ Number(carsStore.latestCar.price).toLocaleString() }}</span>
+                </div>
+                <div class="car-features-row">
+                  <div class="car-feature-chip">
+                    <i class="fa-solid fa-road"></i> {{ Number(carsStore.latestCar.mileage).toLocaleString() }} km
+                  </div>
+                  <div class="car-feature-chip">
+                    <i class="fa-solid fa-gas-pump"></i> {{ carsStore.latestCar.fuel_type }}
+                  </div>
+                  <div class="car-feature-chip">
+                    <i class="fa-solid fa-calendar"></i> {{ carsStore.latestCar.year }}
+                  </div>
+                </div>
+                <RouterLink
+                  :to="{ name: 'car-detail', params: { id: carsStore.latestCar.id } }"
+                  class="btn-view-details"
                 >
                   {{ $t('home.featured.viewDetails') }}
                   <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
@@ -210,10 +236,10 @@
           </div>
         </div>
 
-        <!-- Static fallback cards (before API data loads or on error) -->
-        <div v-else class="cars-grid">
+        <!-- Static fallback cards (no API data) -->
+        <div v-else class="cars-grid cars-grid-2">
           <div
-            v-for="(car, index) in staticFeaturedCars"
+            v-for="(car, index) in staticFeaturedCars.slice(0, 2)"
             :key="car.id"
           >
             <div
@@ -380,7 +406,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCarsStore } from '@/stores/cars.js'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -529,6 +555,10 @@ function initReveal() {
 onMounted(() => {
   carsStore.fetchFeatured()
   setTimeout(initReveal, 150)
+})
+
+onActivated(() => {
+  carsStore.fetchFeatured()
 })
 
 onBeforeUnmount(() => {
@@ -1464,11 +1494,19 @@ onBeforeUnmount(() => {
 .container-xl { max-width: 1280px; }
 
 /* ── GRID LAYOUTS ───────────────────────────────────────────── */
-/* Featured cars — 3 columns */
+/* Featured cars — default 3 columns */
 .cars-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+
+/* Featured section — 2 cards, centred, max width constrained */
+.cars-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Why choose us — 4 columns */

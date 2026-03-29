@@ -317,6 +317,12 @@ router.put(
         return res.status(404).json({ success: false, message: 'Car not found' })
       }
 
+      // If this car is being set as featured, unset featured on all other cars first
+      // (only one featured car allowed at a time)
+      if (req.body.featured) {
+        await pool.query('UPDATE cars SET featured = 0 WHERE id != ?', [req.params.id])
+      }
+
       await pool.query(`UPDATE cars SET ${updates.join(', ')}, updated_at = NOW() WHERE id = ?`, values)
 
       const [rows] = await pool.query('SELECT * FROM cars WHERE id = ?', [req.params.id])

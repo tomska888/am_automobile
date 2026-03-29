@@ -310,6 +310,19 @@ export default {
             edit: 'Edit',
             delete: 'Delete',
             deleteConfirm: 'Are you sure you want to delete this car?',
+            filters: {
+                allStatuses: 'All Statuses',
+                allFuels: 'All Fuels',
+                allBodies: 'All Body Types',
+                yearFrom: 'Year from',
+                yearTo: 'Year to',
+                sortNewest: 'Newest first',
+                sortOldest: 'Oldest first',
+                sortMakeAZ: 'Make A–Z',
+                reset: 'Clear filters',
+                actions: 'Actions',
+                showing: 'filtered'
+            },
             form: {
                 editingSubtitle: 'Editing: {make} {model}',
                 addSubtitle: 'Fill in the details for the new vehicle',
@@ -371,7 +384,7 @@ export default {
                 statusReserved: 'Reserved',
                 statusSold: 'Sold',
                 displayOptions: 'Display Options',
-                featured: 'Featured listing (appears on homepage)',
+                featured: 'Featured listing',
                 mainImage: 'Main Photo',
                 gallery: 'Gallery Photos',
                 uploadDrop: 'Drop photos here or click to select',

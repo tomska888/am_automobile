@@ -310,6 +310,19 @@ export default {
             edit: 'Redaguoti',
             delete: 'Ištrinti',
             deleteConfirm: 'Ar tikrai norite ištrinti šį automobilį?',
+            filters: {
+                allStatuses: 'Visi statusai',
+                allFuels: 'Visi kuro tipai',
+                allBodies: 'Visi kėbulo tipai',
+                yearFrom: 'Metai nuo',
+                yearTo: 'Metai iki',
+                sortNewest: 'Naujausi pirmi',
+                sortOldest: 'Seniausi pirmi',
+                sortMakeAZ: 'Markė A–Z',
+                reset: 'Išvalyti filtrus',
+                actions: 'Veiksmai',
+                showing: 'filtruota'
+            },
             form: {
                 editingSubtitle: 'Redaguojate: {make} {model}',
                 addSubtitle: 'Užpildykite naujo automobilio duomenis',

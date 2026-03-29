@@ -581,14 +581,15 @@ const isEditing = computed(() => !!props.car?.id)
 
 // ─── Populate / reset when modal opens ───────────────────────────────────────
 watch(
-  () => props.modelValue,
-  (isOpen) => {
+  () => [props.modelValue, props.car],
+  ([isOpen]) => {
     if (isOpen) {
       const car = props.car
       if (car) {
         form.value = {
           ...defaultForm(),
           ...car,
+          featured: car.featured === 1 || car.featured === true,
           features: Array.isArray(car.features) ? [...car.features] : [],
         }
         // Rebuild photos array from existing car data

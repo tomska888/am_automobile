@@ -6,6 +6,7 @@ export const useCarsStore = defineStore('cars', () => {
     // ── State ────────────────────────────────────────────────
     const cars = ref([])
     const featuredCars = ref([])
+    const latestCar = ref(null)
     const currentCar = ref(null)
     const loading = ref(false)
     const error = ref(null)
@@ -88,8 +89,28 @@ export const useCarsStore = defineStore('cars', () => {
 
     async function fetchFeatured() {
         try {
-            const { data } = await axios.get('/api/cars', { params: { featured: 1, limit: 8 } })
-            featuredCars.value = data.data ?? []
+            // Run both requests in parallel — no sequential dependency / race condition
+            const [featuredRes, latestRes] = await Promise.all([
+                axios.get('/api/cars', {
+                    params: { featured: 'true', limit: 1 }
+                }),
+                axios.get('/api/cars', {
+                    params: { sort: 'created_at', order: 'DESC', limit: 3, status: 'available' }
+                })
+            ])
+
+            const newFeatured = featuredRes.data.data ?? []
+            const latestArr = latestRes.data.data ?? []
+
+            // Determine featured ID from the fresh response (not stale state)
+            const featuredId = newFeatured[0]?.id
+
+            // Pick the most recent car that isn't the featured car
+            const newLatest = latestArr.find(c => c.id !== featuredId) ?? null
+
+            // Update state atomically after both calls succeed
+            featuredCars.value = newFeatured
+            latestCar.value = newLatest
         } catch { /* silent */ }
     }
 
@@ -147,7 +168,7 @@ export const useCarsStore = defineStore('cars', () => {
     }
 
     return {
-        cars, featuredCars, currentCar, loading, error, pagination, filters,
+        cars, featuredCars, latestCar, currentCar, loading, error, pagination, filters,
         hasResults, activeFilterCount,
         fetchCars, fetchFeatured, fetchCarById,
         createCar, updateCar, deleteCar,

@@ -310,6 +310,19 @@ export default {
             edit: 'Bearbeiten',
             delete: 'Löschen',
             deleteConfirm: 'Möchten Sie dieses Fahrzeug wirklich löschen?',
+            filters: {
+                allStatuses: 'Alle Status',
+                allFuels: 'Alle Kraftstoffe',
+                allBodies: 'Alle Karosserieformen',
+                yearFrom: 'Jahr von',
+                yearTo: 'Jahr bis',
+                sortNewest: 'Neueste zuerst',
+                sortOldest: 'Älteste zuerst',
+                sortMakeAZ: 'Marke A–Z',
+                reset: 'Filter zurücksetzen',
+                actions: 'Aktionen',
+                showing: 'gefiltert'
+            },
             form: {
                 editingSubtitle: 'Bearbeitung: {make} {model}',
                 addSubtitle: 'Füllen Sie die Details für das neue Fahrzeug aus',

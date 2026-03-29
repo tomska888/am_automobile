@@ -79,28 +79,6 @@
               </div>
             </div>
 
-            <!-- Profile alerts -->
-            <Transition name="banner-fade">
-              <div v-if="profileSuccess" class="alert-banner alert-success">
-                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.updateSuccess') }}
-              </div>
-            </Transition>
-            <Transition name="banner-fade">
-              <div v-if="profileError" class="alert-banner alert-error">
-                <i class="fa-solid fa-circle-exclamation"></i> {{ profileError }}
-              </div>
-            </Transition>
-            <!-- Password alerts -->
-            <Transition name="banner-fade">
-              <div v-if="passwordSuccess" class="alert-banner alert-success">
-                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.passwordSuccess') }}
-              </div>
-            </Transition>
-            <Transition name="banner-fade">
-              <div v-if="passwordError" class="alert-banner alert-error">
-                <i class="fa-solid fa-circle-exclamation"></i> {{ passwordError }}
-              </div>
-            </Transition>
 
             <form class="profile-form" @submit.prevent="saveAll">
 
@@ -484,16 +462,6 @@
               </div>
             </div>
 
-            <Transition name="banner-fade">
-              <div v-if="settingsSuccess" class="alert-banner alert-success">
-                <i class="fa-solid fa-circle-check"></i> {{ $t('profile.settingsSaved') }}
-              </div>
-            </Transition>
-            <Transition name="banner-fade">
-              <div v-if="settingsError" class="alert-banner alert-error">
-                <i class="fa-solid fa-circle-exclamation"></i> {{ settingsError }}
-              </div>
-            </Transition>
 
             <!-- Theme -->
             <div class="settings-section">
@@ -633,21 +601,15 @@ function goToCar(id) {
 // ── Edit Profile ───────────────────────────────────────────────────────
 const profileForm = ref({ name: '', email: '' })
 const profileLoading = ref(false)
-const profileSuccess = ref(false)
-const profileError = ref('')
 
 function resetProfileForm() {
   profileForm.value = {
     name:  authStore.user?.name  || '',
     email: authStore.user?.email || '',
   }
-  profileSuccess.value = false
-  profileError.value = ''
 }
 
 async function saveProfile() {
-  profileSuccess.value = false
-  profileError.value = ''
   profileLoading.value = true
   const result = await authStore.updateProfile({
     name:  profileForm.value.name.trim(),
@@ -655,18 +617,15 @@ async function saveProfile() {
   })
   profileLoading.value = false
   if (result.success) {
-    profileSuccess.value = true
-    setTimeout(() => { profileSuccess.value = false }, 4000)
+    uiStore.toast.success(t('profile.updateSuccess'))
   } else {
-    profileError.value = result.message || t('profile.updateError')
+    uiStore.toast.error(result.message || t('profile.updateError'))
   }
 }
 
 // ── Password ───────────────────────────────────────────────────────────
 const passwordForm = ref({ current: '', newPw: '', confirm: '' })
 const passwordLoading = ref(false)
-const passwordSuccess = ref(false)
-const passwordError = ref('')
 const showCurrentPw = ref(false)
 const showNewPw = ref(false)
 const showConfirmPw = ref(false)
@@ -699,11 +658,11 @@ async function saveAll() {
   const hasPasswordData = passwordForm.value.current || passwordForm.value.newPw || passwordForm.value.confirm
   if (hasPasswordData) {
     if (passwordForm.value.newPw !== passwordForm.value.confirm) {
-      passwordError.value = t('profile.passwordMismatch')
+      uiStore.toast.error(t('profile.passwordMismatch'))
       return
     }
     if (!canSavePassword.value) {
-      passwordError.value = t('profile.passwordError')
+      uiStore.toast.error(t('profile.passwordError'))
       return
     }
     await savePassword()
@@ -757,33 +716,26 @@ const canSavePassword = computed(() =>
 
 function resetPasswordForm() {
   passwordForm.value = { current: '', newPw: '', confirm: '' }
-  passwordSuccess.value = false
-  passwordError.value = ''
 }
 
 async function savePassword() {
-  passwordSuccess.value = false
-  passwordError.value = ''
   if (passwordForm.value.newPw !== passwordForm.value.confirm) {
-    passwordError.value = t('profile.passwordMismatch')
+    uiStore.toast.error(t('profile.passwordMismatch'))
     return
   }
   passwordLoading.value = true
   const result = await authStore.changePassword(passwordForm.value.current, passwordForm.value.newPw)
   passwordLoading.value = false
   if (result.success) {
-    passwordSuccess.value = true
+    uiStore.toast.success(t('profile.passwordSuccess'))
     resetPasswordForm()
-    setTimeout(() => { passwordSuccess.value = false }, 4000)
   } else {
-    passwordError.value = result.message || t('profile.passwordError')
+    uiStore.toast.error(result.message || t('profile.passwordError'))
   }
 }
 
 // ── Settings (theme + locale) ──────────────────────────────────────────
 const settingsLoading = ref(false)
-const settingsSuccess = ref(false)
-const settingsError = ref('')
 
 const themeOptions = [
   { value: 'light',  icon: 'fa-solid fa-sun',     labelKey: 'theme.light' },
@@ -811,8 +763,6 @@ function setLocalePref(code) {
 }
 
 async function saveSettings() {
-  settingsError.value = ''
-  settingsSuccess.value = false
   settingsLoading.value = true
   const result = await authStore.savePreferences({
     theme:  uiStore.theme,
@@ -820,10 +770,9 @@ async function saveSettings() {
   })
   settingsLoading.value = false
   if (result.success) {
-    settingsSuccess.value = true
-    setTimeout(() => { settingsSuccess.value = false }, 3000)
+    uiStore.toast.success(t('profile.settingsSaved'))
   } else {
-    settingsError.value = t('profile.settingsSaveError')
+    uiStore.toast.error(t('profile.settingsSaveError'))
   }
 }
 
@@ -1402,28 +1351,6 @@ onMounted(async () => {
 .btn-secondary:hover {
   background: var(--border-color);
   color: var(--text-primary);
-}
-
-/* ── Alert Banners ────────────────────────────────────────────────── */
-.alert-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.875rem 2rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.alert-success {
-  background: rgba(16,185,129,0.08);
-  color: #059669;
-  border-bottom: 1px solid rgba(16,185,129,0.18);
-}
-
-.alert-error {
-  background: rgba(239,68,68,0.07);
-  color: #dc2626;
-  border-bottom: 1px solid rgba(239,68,68,0.15);
 }
 
 /* ── Favorites ────────────────────────────────────────────────────── */
@@ -2217,19 +2144,6 @@ onMounted(async () => {
 .tab-fade-leave-to {
   opacity: 0;
   transform: translateY(-6px);
-}
-
-.banner-fade-enter-active,
-.banner-fade-leave-active {
-  transition: opacity 0.25s ease, max-height 0.25s ease;
-  overflow: hidden;
-  max-height: 80px;
-}
-
-.banner-fade-enter-from,
-.banner-fade-leave-to {
-  opacity: 0;
-  max-height: 0;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */
