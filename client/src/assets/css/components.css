@@ -945,8 +945,7 @@ h6 {
     margin-bottom: var(--space-1);
 }
 
-.admin-nav-link:hover,
-.admin-nav-link.router-link-active {
+.admin-nav-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: #FFFFFF;
 }

@@ -73,8 +73,6 @@ app.use('/api/favorites', require('../routes/favorites'))
 app.use('/api/contact', require('../routes/contact'))
 app.use('/api/messages', require('../routes/messages'))
 app.use('/api/stats', require('../routes/stats'))
-app.use('/api/users', require('../routes/users'))
-
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
     res.json({

@@ -17,59 +17,6 @@ function validate(req, res) {
   return true
 }
 
-// ─── GET /api/users ───────────────────────────────────────────────────────────
-
-router.get('/', async (req, res) => {
-  try {
-    const { search, role, is_active, page = 1, limit = 20 } = req.query
-
-    const conditions = []
-    const params = []
-
-    if (search) {
-      conditions.push('(name LIKE ? OR email LIKE ?)')
-      const s = `%${search}%`
-      params.push(s, s)
-    }
-    if (role) { conditions.push('role = ?'); params.push(role) }
-    if (is_active !== undefined) { conditions.push('is_active = ?'); params.push(is_active === 'true' ? 1 : 0) }
-
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
-
-    const pageNum = Math.max(1, parseInt(page))
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit)))
-    const offset = (pageNum - 1) * limitNum
-
-    const [[{ total }]] = await pool.query(
-      `SELECT COUNT(*) AS total FROM users ${where}`,
-      params
-    )
-
-    const [users] = await pool.query(
-      `SELECT id, name, email, role, is_active, last_login, created_at
-       FROM users
-       ${where}
-       ORDER BY created_at DESC
-       LIMIT ? OFFSET ?`,
-      [...params, limitNum, offset]
-    )
-
-    res.json({
-      success: true,
-      data: users,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: Math.ceil(total / limitNum)
-      }
-    })
-  } catch (err) {
-    console.error('GET /users error:', err)
-    res.status(500).json({ success: false, message: 'Failed to fetch users' })
-  }
-})
-
 // ─── GET /api/users/:id ───────────────────────────────────────────────────────
 
 router.get(

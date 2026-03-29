@@ -42,11 +42,6 @@
           <span>{{ $t('admin.messages.title') }}</span>
           <span v-if="unreadMessages > 0" class="admin-badge">{{ unreadMessages }}</span>
         </RouterLink>
-        <RouterLink :to="{ name: 'admin-users' }" class="admin-nav-link">
-          <i class="fa-solid fa-users"></i>
-          <span>{{ $t('admin.users.title') }}</span>
-        </RouterLink>
-
         <div class="admin-nav-divider"></div>
 
         <RouterLink to="/" class="admin-nav-link">
@@ -115,10 +110,6 @@
               <i class="fa-solid fa-envelope"></i>
               {{ $t('admin.messages.title') }}
               <span v-if="unreadMessages > 0" class="admin-badge">{{ unreadMessages }}</span>
-            </RouterLink>
-            <RouterLink :to="{ name: 'admin-users' }" class="admin-mobile-nav-link" @click="mobileMenuOpen = false">
-              <i class="fa-solid fa-users"></i>
-              {{ $t('admin.users.title') }}
             </RouterLink>
           </nav>
 
@@ -298,8 +289,7 @@ async function handleLogout() {
   flex-shrink: 0;
 }
 
-.admin-nav-link:hover,
-.admin-nav-link.router-link-active {
+.admin-nav-link:hover {
   background: rgba(255,255,255,0.1);
   color: #fff;
 }

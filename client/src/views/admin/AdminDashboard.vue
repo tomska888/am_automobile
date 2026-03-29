@@ -37,13 +37,6 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-icon blue"><i class="fa-solid fa-users"></i></div>
-        <div>
-          <div class="stat-card-value">{{ stats.users?.total || 0 }}</div>
-          <div class="stat-card-label">{{ $t('admin.dashboard.users') }}</div>
-        </div>
-      </div>
-      <div class="stat-card">
         <div class="stat-card-icon yellow"><i class="fa-solid fa-envelope"></i></div>
         <div>
           <div class="stat-card-value">{{ stats.messages?.total || 0 }}</div>
@@ -97,7 +90,7 @@ import axios from 'axios'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 const loading    = ref(true)
-const stats      = ref({ cars: {}, messages: {}, users: {} })
+const stats      = ref({ cars: {}, messages: {} })
 const recentCars = ref([])
 
 onMounted(async () => {

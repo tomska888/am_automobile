@@ -83,12 +83,6 @@ const routes = [
         name: 'admin-messages',
         component: () => import('@/views/admin/AdminMessages.vue'),
         meta: { title: 'Messages — Admin' }
-      },
-      {
-        path: 'users',
-        name: 'admin-users',
-        component: () => import('@/views/admin/AdminUsers.vue'),
-        meta: { title: 'Users — Admin' }
       }
     ]
   },

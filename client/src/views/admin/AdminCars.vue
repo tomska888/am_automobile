@@ -704,7 +704,6 @@ function formatPrice(price) {
   border: none;
   outline: none;
   text-align: center;
-  -moz-appearance: textfield;
 }
 
 .adm-range-input::-webkit-outer-spin-button,
